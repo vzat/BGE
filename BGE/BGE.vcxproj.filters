@@ -42,6 +42,9 @@
     <Filter Include="Prefabs">
       <UniqueIdentifier>{697651d2-0cd7-45c2-b4a6-56fe6f15526c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Animats">
+      <UniqueIdentifier>{6366cc01-2343-46ab-8070-bd4cf2f6055d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -212,6 +215,9 @@
     <ClCompile Include="Lab3.cpp">
       <Filter>Labs</Filter>
     </ClCompile>
+    <ClCompile Include="AnimatGame.cpp">
+      <Filter>Animats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -378,6 +384,9 @@
     </ClInclude>
     <ClInclude Include="Lab3.h">
       <Filter>Labs</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatGame.h">
+      <Filter>Animats</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
