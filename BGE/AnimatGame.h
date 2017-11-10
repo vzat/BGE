@@ -23,6 +23,7 @@ namespace BGE
 		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 position, int blockSize, int noWidth, int noHeight);
 		void CreateAnimat(glm::vec3 position, float totalSize);
 		float getPercentage(float value, float percentage);
+		btQuaternion toBtQuat(glm::quat quat);
 	};
 }
 

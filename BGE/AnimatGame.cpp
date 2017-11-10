@@ -98,11 +98,27 @@ void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
 
 		btTransform leg1T, leg2T, bodyLeg1T, bodyLeg2T;
 		leg1T.setIdentity();
-		bodyLeg1T.setIdentity();
+		leg1T.setRotation(toBtQuat(frontLegAngleQuat));
 		leg1T.setOrigin(btVector3(0, - frontLegLength / 2, 0));
-		bodyLeg1T.setOrigin(btVector3(offset1.x, offset1.y, offset1.z));
+
+		bodyLeg1T.setIdentity();
+		bodyLeg1T.setRotation(toBtQuat(bodyAngleQuat));
+		bodyLeg1T.setOrigin(btVector3(bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
+
 		btFixedConstraint *frontLeg1_Body = new btFixedConstraint(*body->rigidBody, *leg1->rigidBody, bodyLeg1T, leg1T);
 		dynamicsWorld->addConstraint(frontLeg1_Body);
+
+
+		leg2T.setIdentity();
+		leg2T.setRotation(toBtQuat(frontLegAngleQuat));
+		leg2T.setOrigin(btVector3(0, -frontLegLength / 2, 0));
+
+		bodyLeg2T.setIdentity();
+		bodyLeg2T.setRotation(toBtQuat(bodyAngleQuat));
+		bodyLeg2T.setOrigin(btVector3(-bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
+
+		btFixedConstraint *frontLeg2_Body = new btFixedConstraint(*body->rigidBody, *leg2->rigidBody, bodyLeg2T, leg2T);
+		dynamicsWorld->addConstraint(frontLeg2_Body);
 
 		frontLegs.push_back(leg1);
 		frontLegs.push_back(leg2);
@@ -112,4 +128,9 @@ void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
 float BGE::AnimatGame::getPercentage(float value, float percentage)
 {
 	return percentage / 100 * value;
+}
+
+btQuaternion BGE::AnimatGame::toBtQuat(glm::quat quat)
+{
+	return btQuaternion(quat[0], quat[1], quat[2], quat[3]);
 }
