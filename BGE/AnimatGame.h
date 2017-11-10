@@ -18,7 +18,9 @@ namespace BGE
 		bool Initialise();
 		void Update(float timeDelta);
 		void Cleanup();
-		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 origin, int blockSize, int noWidth, int noHeight);
+
+		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 position, int blockSize, int noWidth, int noHeight);
+		void CreateAnimat(glm::vec3 position);
 	};
 }
 

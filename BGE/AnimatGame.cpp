@@ -16,7 +16,20 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateCameraPhysics();
 
 	dynamicsWorld->setGravity(btVector3(0, -9, 0));
-	CreateWall(glm::vec3(0, 0, 0), 3, 10, 10);
+
+	// Create Walls
+	int noWalls = rand() % 3 + 1;
+	int maxBlocks = 5;
+	int minBlocks = 2;
+	for (int i = 0; i < noWalls; i++)
+	{
+		int blockSize = rand() % 3 + 1;
+		int blocksWidth = rand() % (maxBlocks - 1) + minBlocks;
+		int blocksHeight = rand() % (maxBlocks - 1) + minBlocks;
+		CreateWall(glm::vec3(rand() % 100, 0, rand() % 100), blockSize, blocksWidth, blocksHeight);
+	}
+
+	CreateAnimat(glm::vec3(0, 0, 0));
 
 	if (!Game::Initialise()) {
 		return false;
@@ -37,7 +50,7 @@ void BGE::AnimatGame::Cleanup()
 	Game::Cleanup();
 }
 
-std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateWall(glm::vec3 origin, int blockSize, int noWidth, int noHeight)
+std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateWall(glm::vec3 position, int blockSize, int noWidth, int noHeight)
 {
 	// Store the boxes in a wall vector
 	std::vector<std::vector<shared_ptr<PhysicsController>>> wall;
@@ -47,10 +60,19 @@ std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateW
 		wall.push_back(line);
 		for (int j = 0; j < noHeight; j++)
 		{
-			shared_ptr<PhysicsController> box = physicsFactory->CreateBox(blockSize, blockSize, blockSize, origin + glm::vec3(i * blockSize, j * blockSize, 0), glm::quat());
+			shared_ptr<PhysicsController> box = physicsFactory->CreateBox(blockSize, blockSize, blockSize, position + glm::vec3(i * blockSize, j * blockSize, 0), glm::quat());
 			line.push_back(box);
 		}
 	}
 
 	return wall;
+}
+
+void BGE::AnimatGame::CreateAnimat(glm::vec3 position)
+{
+	int bodyRadius = 2;
+	int bodyLength = 10;
+	float theta = 90;
+	glm::quat angleQuat = glm::angleAxis(theta, glm::vec3(1, 0, 0));
+	shared_ptr<PhysicsController> body = physicsFactory->CreateCylinder(bodyRadius, bodyLength, position, angleQuat);
 }
