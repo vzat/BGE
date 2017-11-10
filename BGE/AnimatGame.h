@@ -5,6 +5,7 @@
 #include "PhysicsFactory.h"
 #include "Box.h"
 #include <vector>
+#include <btBulletDynamicsCommon.h>
 
 namespace BGE
 {
@@ -20,7 +21,8 @@ namespace BGE
 		void Cleanup();
 
 		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 position, int blockSize, int noWidth, int noHeight);
-		void CreateAnimat(glm::vec3 position);
+		void CreateAnimat(glm::vec3 position, float totalSize);
+		float getPercentage(float value, float percentage);
 	};
 }
 

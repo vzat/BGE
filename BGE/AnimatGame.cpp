@@ -15,7 +15,7 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateGroundPhysics();
 	physicsFactory->CreateCameraPhysics();
 
-	dynamicsWorld->setGravity(btVector3(0, -9, 0));
+	//dynamicsWorld->setGravity(btVector3(0, -9, 0));
 
 	// Create Walls
 	int noWalls = rand() % 3 + 1;
@@ -29,7 +29,7 @@ bool AnimatGame::Initialise()
 		CreateWall(glm::vec3(rand() % 100, 0, rand() % 100), blockSize, blocksWidth, blocksHeight);
 	}
 
-	CreateAnimat(glm::vec3(0, 0, 0));
+	CreateAnimat(glm::vec3(0, 10, 0), 10);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -68,11 +68,48 @@ std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateW
 	return wall;
 }
 
-void BGE::AnimatGame::CreateAnimat(glm::vec3 position)
+void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
 {
-	int bodyRadius = 2;
-	int bodyLength = 10;
-	float theta = 90;
-	glm::quat angleQuat = glm::angleAxis(theta, glm::vec3(1, 0, 0));
-	shared_ptr<PhysicsController> body = physicsFactory->CreateCylinder(bodyRadius, bodyLength, position, angleQuat);
+	// Body
+	float bodyLength = totalSize;
+	float bodyRadius = getPercentage(bodyLength, 10);
+	float bodyAngle = 90;
+	// Rotate body 90 degrees so it's sitting horizontally
+	glm::quat bodyAngleQuat = glm::angleAxis(bodyAngle, glm::vec3(1, 0, 0));
+	shared_ptr<PhysicsController> body = physicsFactory->CreateCylinder(bodyRadius, bodyLength, position, bodyAngleQuat);
+
+	
+	// Front Legs
+	std::vector<shared_ptr<PhysicsController>> frontLegs;
+
+	int noPairsFrontLegs = 3;
+	float frontLegLength = getPercentage(bodyLength, 33);
+	float frontLegRadius = getPercentage(frontLegLength, 10);
+	float frontLegAngle = bodyAngle - 90;
+	float frontLegDistance = getPercentage(bodyLength, 15);
+	glm::quat frontLegAngleQuat = glm::angleAxis(frontLegAngle, glm::vec3(1, 0, 0));
+	for (int i = 0; i < noPairsFrontLegs; i++)
+	{
+		glm::vec3 offset1 = glm::vec3(bodyRadius - frontLegRadius, - frontLegLength / 2 - bodyRadius, bodyLength / 2 - frontLegRadius - i * frontLegDistance);
+		shared_ptr<PhysicsController> leg1 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset1, frontLegAngleQuat);
+	
+		glm::vec3 offset2 = offset1 - glm::vec3(2 * bodyRadius - 2 * frontLegRadius, 0, 0);
+		shared_ptr<PhysicsController> leg2 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset2, frontLegAngleQuat);
+
+		btTransform leg1T, leg2T, bodyLeg1T, bodyLeg2T;
+		leg1T.setIdentity();
+		bodyLeg1T.setIdentity();
+		leg1T.setOrigin(btVector3(0, - frontLegLength / 2, 0));
+		bodyLeg1T.setOrigin(btVector3(offset1.x, offset1.y, offset1.z));
+		btFixedConstraint *frontLeg1_Body = new btFixedConstraint(*body->rigidBody, *leg1->rigidBody, bodyLeg1T, leg1T);
+		dynamicsWorld->addConstraint(frontLeg1_Body);
+
+		frontLegs.push_back(leg1);
+		frontLegs.push_back(leg2);
+	}
+}
+
+float BGE::AnimatGame::getPercentage(float value, float percentage)
+{
+	return percentage / 100 * value;
 }
