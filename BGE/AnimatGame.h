@@ -2,6 +2,9 @@
 #ifndef ANIMAT_ANIMATGAME_H
 #define ANIMAT_ANIMATGAME_H
 #include "Game.h"
+#include "PhysicsFactory.h"
+#include "Box.h"
+#include <vector>
 
 namespace BGE
 {
@@ -15,6 +18,7 @@ namespace BGE
 		bool Initialise();
 		void Update(float timeDelta);
 		void Cleanup();
+		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 origin, int blockSize, int noWidth, int noHeight);
 	};
 }
 
