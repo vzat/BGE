@@ -30,7 +30,7 @@ bool AnimatGame::Initialise()
 	}
 
 	//CreateAnimat(glm::vec3(0, 10, 0), 10);
-	Zombie(glm::vec3(0, 10, 0), 10);
+	animat = CreateZombie(glm::vec3(0, 0, 0), 5);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -43,6 +43,10 @@ bool AnimatGame::Initialise()
 
 void BGE::AnimatGame::Update(float timeDelta)
 {
+	animat.arm1->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+	animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+	//animat.body->rigidBody->applyTorque(timeDelta * 100 * btVector3(0.0f, 100.0f, 0.0f));
+
 	Game::Update(timeDelta);
 }
 
@@ -69,7 +73,7 @@ std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateW
 	return wall;
 }
 
-void BGE::AnimatGame::Zombie(glm::vec3 position, float totalSize)
+zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 {
 	// Body
 	float bodyLength = totalSize;
@@ -77,21 +81,31 @@ void BGE::AnimatGame::Zombie(glm::vec3 position, float totalSize)
 	float bodyHeight = bodyWidth / 2;
 	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
 
-
 	// Head
-	float headRadius = bodyWidth / 4;
-	glm::vec3 headOffset = glm::vec3(0, 0, bodyLength / 2 + headRadius);
-	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
+	//float headRadius = bodyWidth / 8;
+	//glm::vec3 headOffset = glm::vec3(0, 0, bodyLength / 2 + headRadius + 0.1);
+	//shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
 
-	btTransform bodyHeadT, headBodyT;
-	bodyHeadT.setIdentity();
-	bodyHeadT.setOrigin(btVector3(0, 0, headOffset.z));
+	//btTransform bodyHeadT, headBodyT;
+	//bodyHeadT.setIdentity();
+	//bodyHeadT.setOrigin(btVector3(0, 0, headOffset.z));
 
-	headBodyT.setIdentity();
-	headBodyT.setOrigin(btVector3(0, 0, headRadius));
+	//headBodyT.setIdentity();
+	//headBodyT.setOrigin(btVector3(0, 0, headRadius));
 
-	btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
-	dynamicsWorld->addConstraint(headBody);
+	//btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
+	//dynamicsWorld->addConstraint(headBody);
+
+
+	// Reference: https://studiofreya.com/game-maker/bullet-physics/bullet-physics-how-to-change-body-mass/
+	//btRigidBody *rigidHead = head->rigidBody;
+	//dynamicsWorld->removeRigidBody(rigidHead);
+	//float headMass = 1.0f;
+	//btVector3 headInertia(0, 0, 0);
+	//rigidHead->getCollisionShape()->calculateLocalInertia(headMass, headInertia);
+	//rigidHead->setMassProps(headMass, headInertia);
+	//dynamicsWorld->addRigidBody(rigidHead);
+	// End Reference
 
 
 	// Arms
@@ -103,6 +117,7 @@ void BGE::AnimatGame::Zombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> arm1 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm1Offset, glm::quat());
 
 	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 4), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	arm1Body->setLimit(-4, 4);
 	dynamicsWorld->addConstraint(arm1Body);
 
 	// Right Arm
@@ -110,10 +125,19 @@ void BGE::AnimatGame::Zombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> arm2 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm2Offset, glm::quat());
 
 	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 4), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	arm2Body->setLimit(-4, 4);
 	dynamicsWorld->addConstraint(arm2Body);
+
+	zombieRigid zombie;
+
+	zombie.body = body;
+	zombie.arm1 = arm1;
+	zombie.arm2 = arm2;
+
+	return zombie;
 }
 
-void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
+shared_ptr<PhysicsController> BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
 {
 	// Body
 	float bodyLength = totalSize;
@@ -183,6 +207,8 @@ void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
 	//	frontLegs.push_back(leg1);
 	//	frontLegs.push_back(leg2);
 	//}
+
+	return body;
 }
 
 float BGE::AnimatGame::getPercentage(float value, float percentage)

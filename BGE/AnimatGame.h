@@ -9,6 +9,12 @@
 
 namespace BGE
 {
+	struct zombieRigid {
+		shared_ptr<PhysicsController> body;
+		shared_ptr<PhysicsController> arm1;
+		shared_ptr<PhysicsController> arm2;
+	};
+
 	class AnimatGame : public Game
 	{
 	private:
@@ -21,10 +27,12 @@ namespace BGE
 		void Cleanup();
 
 		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 position, int blockSize, int noWidth, int noHeight);
-		void CreateAnimat(glm::vec3 position, float totalSize);
-		void Zombie(glm::vec3 position, float totalSize);
+		shared_ptr<PhysicsController> CreateAnimat(glm::vec3 position, float totalSize);
+		zombieRigid CreateZombie(glm::vec3 position, float totalSize);
 		float getPercentage(float value, float percentage);
+
 		btQuaternion toBtQuat(glm::quat quat);
+		zombieRigid animat;
 	};
 }
 
