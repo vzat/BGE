@@ -15,7 +15,7 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateGroundPhysics();
 	physicsFactory->CreateCameraPhysics();
 
-	//dynamicsWorld->setGravity(btVector3(0, -9, 0));
+	dynamicsWorld->setGravity(btVector3(0, -9, 0));
 
 	// Create Walls
 	int noWalls = rand() % 3 + 1;
@@ -29,7 +29,8 @@ bool AnimatGame::Initialise()
 		CreateWall(glm::vec3(rand() % 100, 0, rand() % 100), blockSize, blocksWidth, blocksHeight);
 	}
 
-	CreateAnimat(glm::vec3(0, 10, 0), 10);
+	//CreateAnimat(glm::vec3(0, 10, 0), 10);
+	Zombie(glm::vec3(0, 10, 0), 10);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -66,6 +67,50 @@ std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateW
 	}
 
 	return wall;
+}
+
+void BGE::AnimatGame::Zombie(glm::vec3 position, float totalSize)
+{
+	// Body
+	float bodyLength = totalSize;
+	float bodyWidth = bodyLength / 2;
+	float bodyHeight = bodyWidth / 2;
+	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
+
+
+	// Head
+	float headRadius = bodyWidth / 4;
+	glm::vec3 headOffset = glm::vec3(0, 0, bodyLength / 2 + headRadius);
+	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
+
+	btTransform bodyHeadT, headBodyT;
+	bodyHeadT.setIdentity();
+	bodyHeadT.setOrigin(btVector3(0, 0, headOffset.z));
+
+	headBodyT.setIdentity();
+	headBodyT.setOrigin(btVector3(0, 0, headRadius));
+
+	btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
+	dynamicsWorld->addConstraint(headBody);
+
+
+	// Arms
+	float armRadius = bodyWidth / 8;
+	float armLength = bodyLength / 2;
+
+	// Left Arm
+	glm::vec3 arm1Offset = glm::vec3(bodyWidth / 2 + armRadius, 0, bodyLength / 2 + armLength / 4);
+	shared_ptr<PhysicsController> arm1 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm1Offset, glm::quat());
+
+	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 4), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	dynamicsWorld->addConstraint(arm1Body);
+
+	// Right Arm
+	glm::vec3 arm2Offset = glm::vec3(- bodyWidth / 2 - armRadius, 0, bodyLength / 2 + armLength / 4);
+	shared_ptr<PhysicsController> arm2 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm2Offset, glm::quat());
+
+	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 4), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	dynamicsWorld->addConstraint(arm2Body);
 }
 
 void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
