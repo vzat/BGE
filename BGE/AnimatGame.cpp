@@ -72,57 +72,72 @@ void BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
 {
 	// Body
 	float bodyLength = totalSize;
-	float bodyRadius = getPercentage(bodyLength, 10);
-	float bodyAngle = 90;
-	// Rotate body 90 degrees so it's sitting horizontally
-	glm::quat bodyAngleQuat = glm::angleAxis(bodyAngle, glm::vec3(1, 0, 0));
-	shared_ptr<PhysicsController> body = physicsFactory->CreateCylinder(bodyRadius, bodyLength, position, bodyAngleQuat);
+	float bodyWidth = bodyLength / 4;
+	float bodyHeight = bodyWidth / 2;
+	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
 
-	
 	// Front Legs
-	std::vector<shared_ptr<PhysicsController>> frontLegs;
-
-	int noPairsFrontLegs = 3;
-	float frontLegLength = getPercentage(bodyLength, 33);
-	float frontLegRadius = getPercentage(frontLegLength, 10);
-	float frontLegAngle = bodyAngle - 90;
-	float frontLegDistance = getPercentage(bodyLength, 15);
-	glm::quat frontLegAngleQuat = glm::angleAxis(frontLegAngle, glm::vec3(1, 0, 0));
-	for (int i = 0; i < noPairsFrontLegs; i++)
-	{
-		glm::vec3 offset1 = glm::vec3(bodyRadius - frontLegRadius, - frontLegLength / 2 - bodyRadius, bodyLength / 2 - frontLegRadius - i * frontLegDistance);
-		shared_ptr<PhysicsController> leg1 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset1, frontLegAngleQuat);
+	float frontLegRadius = bodyHeight / 8;
+	float frontLegSegmentLength = bodyWidth;
 	
-		glm::vec3 offset2 = offset1 - glm::vec3(2 * bodyRadius - 2 * frontLegRadius, 0, 0);
-		shared_ptr<PhysicsController> leg2 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset2, frontLegAngleQuat);
+	float frontLegSegmentAngle1 = 45.0f;
+	glm::vec3 frontLegSegmentOffset1 = glm::vec3(bodyWidth / 2, - bodyHeight / 2 - frontLegSegmentLength / 2, bodyLength / 2);
+	glm::quat frontLegSegmentQuat1 = glm::angleAxis(frontLegSegmentAngle1, glm::vec3(0, 0, 1));
+	shared_ptr<PhysicsController> frontLegSegmentTop = physicsFactory->CreateCylinder(frontLegRadius, frontLegSegmentLength, position + frontLegSegmentOffset1, frontLegSegmentQuat1);
 
-		btTransform leg1T, leg2T, bodyLeg1T, bodyLeg2T;
-		leg1T.setIdentity();
-		leg1T.setRotation(toBtQuat(frontLegAngleQuat));
-		leg1T.setOrigin(btVector3(0, - frontLegLength / 2, 0));
+	//// Body
+	//float bodyLength = totalSize;
+	//float bodyRadius = getPercentage(bodyLength, 10);
+	//float bodyAngle = 90;
+	//// Rotate body 90 degrees so it's sitting horizontally
+	//glm::quat bodyAngleQuat = glm::angleAxis(bodyAngle, glm::vec3(1, 0, 0));
+	//shared_ptr<PhysicsController> body = physicsFactory->CreateCylinder(bodyRadius, bodyLength, position, bodyAngleQuat);
 
-		bodyLeg1T.setIdentity();
-		bodyLeg1T.setRotation(toBtQuat(bodyAngleQuat));
-		bodyLeg1T.setOrigin(btVector3(bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
+	//
+	//// Front Legs
+	//std::vector<shared_ptr<PhysicsController>> frontLegs;
 
-		btFixedConstraint *frontLeg1_Body = new btFixedConstraint(*body->rigidBody, *leg1->rigidBody, bodyLeg1T, leg1T);
-		dynamicsWorld->addConstraint(frontLeg1_Body);
+	//int noPairsFrontLegs = 3;
+	//float frontLegLength = getPercentage(bodyLength, 33);
+	//float frontLegRadius = getPercentage(frontLegLength, 10);
+	//float frontLegAngle = bodyAngle - 90;
+	//float frontLegDistance = getPercentage(bodyLength, 15);
+	//glm::quat frontLegAngleQuat = glm::angleAxis(frontLegAngle, glm::vec3(1, 0, 0));
+	//for (int i = 0; i < noPairsFrontLegs; i++)
+	//{
+	//	glm::vec3 offset1 = glm::vec3(bodyRadius - frontLegRadius, - frontLegLength / 2 - bodyRadius, bodyLength / 2 - frontLegRadius - i * frontLegDistance);
+	//	shared_ptr<PhysicsController> leg1 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset1, frontLegAngleQuat);
+	//
+	//	glm::vec3 offset2 = offset1 - glm::vec3(2 * bodyRadius - 2 * frontLegRadius, 0, 0);
+	//	shared_ptr<PhysicsController> leg2 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset2, frontLegAngleQuat);
+
+	//	btTransform leg1T, leg2T, bodyLeg1T, bodyLeg2T;
+	//	leg1T.setIdentity();
+	//	leg1T.setRotation(toBtQuat(frontLegAngleQuat));
+	//	leg1T.setOrigin(btVector3(0, - frontLegLength / 2, 0));
+
+	//	bodyLeg1T.setIdentity();
+	//	bodyLeg1T.setRotation(toBtQuat(bodyAngleQuat));
+	//	bodyLeg1T.setOrigin(btVector3(bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
+
+	//	btFixedConstraint *frontLeg1_Body = new btFixedConstraint(*body->rigidBody, *leg1->rigidBody, bodyLeg1T, leg1T);
+	//	dynamicsWorld->addConstraint(frontLeg1_Body);
 
 
-		leg2T.setIdentity();
-		leg2T.setRotation(toBtQuat(frontLegAngleQuat));
-		leg2T.setOrigin(btVector3(0, -frontLegLength / 2, 0));
+	//	leg2T.setIdentity();
+	//	leg2T.setRotation(toBtQuat(frontLegAngleQuat));
+	//	leg2T.setOrigin(btVector3(0, -frontLegLength / 2, 0));
 
-		bodyLeg2T.setIdentity();
-		bodyLeg2T.setRotation(toBtQuat(bodyAngleQuat));
-		bodyLeg2T.setOrigin(btVector3(-bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
+	//	bodyLeg2T.setIdentity();
+	//	bodyLeg2T.setRotation(toBtQuat(bodyAngleQuat));
+	//	bodyLeg2T.setOrigin(btVector3(-bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
 
-		btFixedConstraint *frontLeg2_Body = new btFixedConstraint(*body->rigidBody, *leg2->rigidBody, bodyLeg2T, leg2T);
-		dynamicsWorld->addConstraint(frontLeg2_Body);
+	//	btFixedConstraint *frontLeg2_Body = new btFixedConstraint(*body->rigidBody, *leg2->rigidBody, bodyLeg2T, leg2T);
+	//	dynamicsWorld->addConstraint(frontLeg2_Body);
 
-		frontLegs.push_back(leg1);
-		frontLegs.push_back(leg2);
-	}
+	//	frontLegs.push_back(leg1);
+	//	frontLegs.push_back(leg2);
+	//}
 }
 
 float BGE::AnimatGame::getPercentage(float value, float percentage)
