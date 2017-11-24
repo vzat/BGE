@@ -40,6 +40,9 @@ namespace BGE
 
 		btQuaternion toBtQuat(glm::quat quat);
 		zombieRigid animat;
+
+		bool move;
+		float arm1Scale, arm2Scale, bodyScale;
 	};
 }
 

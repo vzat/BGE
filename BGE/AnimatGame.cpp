@@ -5,6 +5,10 @@ using namespace BGE;
 
 AnimatGame::AnimatGame(void)
 {
+	move = false;
+	arm1Scale = 0;
+	arm2Scale = 0;
+	bodyScale = 300;
 }
 
 AnimatGame::~AnimatGame(void)
@@ -16,7 +20,7 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateGroundPhysics();
 	physicsFactory->CreateCameraPhysics();
 
-	//dynamicsWorld->setGravity(btVector3(0, -9, 0));
+	dynamicsWorld->setGravity(btVector3(0, -20, 0));
 
 	// Create Walls
 	int noWalls = rand() % 3 + 1;
@@ -31,7 +35,7 @@ bool AnimatGame::Initialise()
 	}
 
 	//CreateAnimat(glm::vec3(0, 10, 0), 10);
-	animat = CreateZombie(glm::vec3(0, 0, 0), 5);
+	animat = CreateZombie(glm::vec3(0, 10, 0), 5);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -44,37 +48,67 @@ bool AnimatGame::Initialise()
 
 void BGE::AnimatGame::Update(float timeDelta)
 {
-	glm::vec3 bodyLook = animat.body->transform->look;
-	glm::vec3 arm1Look = animat.arm1->transform->look;
-	glm::vec3 arm2Look = animat.arm2->transform->look;
+	if (keyState[SDL_SCANCODE_RETURN]) {
+		move = true;
+	}
 
-	//glm::translate(glm::mat4(1), ship1->transform->position) * glm::rotate(glm::mat4(1), glm::degrees(theta), glm::vec3(0, 1, 0
-	//glm::mat4 arm1LookMatrixRotated = arm1LookMatrix * glm::rotate(glm::mat4(1), 90, glm::vec3(0, 1, 0));
-	//glm::vec3 rotated = glm::rotate(arm1Look, 90, glm::vec3(0, 1, 0));
-	
-	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1), -90.0f, glm::vec3(1, 0, 0));
-	glm::vec4 arm1Look4 = glm::vec4(arm1Look.x, arm1Look.y, arm1Look.z, 1.0f);
-	glm::vec4 arm1Force = rotationMatrix * arm1Look4;
-	
-	glm::vec4 arm2Look4 = glm::vec4(arm2Look.x, arm2Look.y, arm2Look.z, 1.0f);
-	glm::vec4 arm2Force = rotationMatrix * arm2Look4;
+	if (move) {
+		glm::vec3 bodyLook = animat.body->transform->look;
+		glm::vec3 arm1Look = animat.arm1->transform->look;
+		glm::vec3 arm2Look = animat.arm2->transform->look;
 
-	
-	//glm::vec4 tempVec = glm::rotate(glm::mat4(1), 90.0f, glm::vec3(0, 1, 0)) * glm::vec4(arm1Look, 1.0);
-	//glm::vec3 arm1NewLook = glm::vec3(tempVec.x, tempVec.y, tempVec.z);
+		//glm::translate(glm::mat4(1), ship1->transform->position) * glm::rotate(glm::mat4(1), glm::degrees(theta), glm::vec3(0, 1, 0
+		//glm::mat4 arm1LookMatrixRotated = arm1LookMatrix * glm::rotate(glm::mat4(1), 90, glm::vec3(0, 1, 0));
+		//glm::vec3 rotated = glm::rotate(arm1Look, 90, glm::vec3(0, 1, 0));
 
-	//animat.arm1->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
-	//animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+		//glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1), 90.0f, glm::vec3(0, 0, 1));
+		//glm::vec4 arm1Look4 = glm::vec4(arm1Look.x, arm1Look.y, arm1Look.z, 1.0f);
+		//glm::vec4 arm1Force = rotationMatrix * arm1Look4;
 
-	//btVector3 force = timeDelta * 5000 * btVector3(0.0f, 1.0f, 0);
-	btVector3 forceArm1 = timeDelta * 5000 * btVector3(arm1Force.x, arm1Force.y, arm1Force.z);
-	btVector3 forceArm2 = timeDelta * 5000 * btVector3(arm2Force.x, arm2Force.y, arm2Force.z);
-	animat.arm1->rigidBody->applyForce(forceArm1, btVector3(0.0f, 0.0f, -5 / 4));
-	animat.arm2->rigidBody->applyForce(forceArm2, btVector3(0.0f, 0.0f, -5 / 4));
-	
-	
+		//glm::vec4 arm2Look4 = glm::vec4(arm2Look.x, arm2Look.y, arm2Look.z, 1.0f);
+		//glm::vec4 arm2Force = rotationMatrix * arm2Look4;
 
-	//animat.body->rigidBody->applyTorque(timeDelta * 100 * btVector3(0.0f, 100.0f, 0.0f));
+
+		//glm::vec4 tempVec = glm::rotate(glm::mat4(1), 90.0f, glm::vec3(0, 1, 0)) * glm::vec4(arm1Look, 1.0);
+		//glm::vec3 arm1NewLook = glm::vec3(tempVec.x, tempVec.y, tempVec.z);
+
+		//animat.arm1->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+		//animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+
+
+		btVector3 totalForce = animat.arm1->rigidBody->getLinearVelocity();
+		float arm1TotalForce = sqrt(pow(totalForce.getX(), 2) + pow(totalForce.getY(), 2) + pow(totalForce.getZ(), 2));
+
+		totalForce = animat.arm2->rigidBody->getLinearVelocity();
+		float arm2TotalForce = sqrt(pow(totalForce.getX(), 2) + pow(totalForce.getY(), 2) + pow(totalForce.getZ(), 2));
+
+		cout << arm1TotalForce << " " << arm2TotalForce << endl;
+
+		float scale = 20.0f;
+		arm1Scale = abs(arm1TotalForce) < 5 ? arm1Scale + scale : arm1Scale - scale;
+		arm2Scale = abs(arm2TotalForce) < 5 ? arm2Scale + scale : arm2Scale - scale;
+
+		arm1Scale = arm1Scale < 0 ? 0 : arm1Scale;
+		arm2Scale = arm2Scale < 0 ? 0 : arm2Scale;
+		
+		cout << arm1Scale << " " << arm2Scale << endl << endl;
+
+		
+		//btVector3 force = timeDelta * 5000 * btVector3(0.0f, 1.0f, 0);
+		btVector3 forceArm1 = timeDelta * arm1Scale * btVector3(0.0f, 1.0f, 0.0f);
+		btVector3 forceArm2 = timeDelta * arm2Scale * btVector3(0.0f, 1.0f, 0.0f);
+		btVector3 forceBody = timeDelta * 300 * btVector3(0.0f, 0.0f, 1.0f);
+		animat.arm1->rigidBody->applyForce(forceArm1, btVector3(0.0f, 0.0f, -5 / 4));
+		animat.arm2->rigidBody->applyForce(forceArm2, btVector3(0.0f, 0.0f, -5 / 4));
+		animat.body->rigidBody->applyCentralImpulse(forceBody);
+
+
+		//animat.body->rigidBody->applyTorque(timeDelta * 100 * btVector3(0.0f, 100.0f, 0.0f));
+
+		// Ideas:
+		// Fish swimming
+		// 2 rectangles connected for an arm
+	}
 
 	Game::Update(timeDelta);
 }
@@ -127,7 +161,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 
 
 	// Arms
-	float armRadius = bodyWidth / 8;
+	float armRadius = bodyWidth / 15;
 	float armLength = bodyLength / 2;
 
 	// Left Arm
@@ -147,19 +181,19 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	dynamicsWorld->addConstraint(arm2Body);
 
 
-	// Add Stuff to the back
+	//Add Stuff to the back
 	int noStuff = 1;
 	float stuffRadius = bodyWidth / 6;
-	glm::vec3 stuffOffset = glm::vec3(bodyWidth / 2, bodyHeight + stuffRadius * 2, 0);
+	glm::vec3 stuffOffset = glm::vec3(bodyWidth / 2, -bodyHeight - stuffRadius * 2, 0);
 	for (int i = 0; i < noStuff; i++) {
 		shared_ptr<PhysicsController> stuff = physicsFactory->CreateBox(stuffRadius * 2, stuffRadius * 2, stuffRadius * 2, position + stuffOffset, glm::quat());
 
 		btTransform stuffBodyT, bodyStuffT;
 		bodyStuffT.setIdentity();
-		bodyStuffT.setOrigin(btVector3(0.0f, bodyHeight / 2, -bodyLength / 2));
+		bodyStuffT.setOrigin(btVector3(0.0f, -bodyHeight / 2, -bodyLength / 2));
 
 		stuffBodyT.setIdentity();
-		stuffBodyT.setOrigin(btVector3(0, -stuffRadius, 0));
+		stuffBodyT.setOrigin(btVector3(0, stuffRadius, 0));
 
 		btFixedConstraint *stuffBody = new btFixedConstraint(*stuff->rigidBody, *body->rigidBody, stuffBodyT, bodyStuffT);
 		dynamicsWorld->addConstraint(stuffBody);
