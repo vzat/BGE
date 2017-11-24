@@ -1,4 +1,5 @@
 #include "AnimatGame.h"
+//#include <glm/gtx/rotate_vector.hpp>
 
 using namespace BGE;
 
@@ -15,7 +16,7 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateGroundPhysics();
 	physicsFactory->CreateCameraPhysics();
 
-	dynamicsWorld->setGravity(btVector3(0, -9, 0));
+	//dynamicsWorld->setGravity(btVector3(0, -9, 0));
 
 	// Create Walls
 	int noWalls = rand() % 3 + 1;
@@ -43,13 +44,36 @@ bool AnimatGame::Initialise()
 
 void BGE::AnimatGame::Update(float timeDelta)
 {
+	glm::vec3 bodyLook = animat.body->transform->look;
+	glm::vec3 arm1Look = animat.arm1->transform->look;
+	glm::vec3 arm2Look = animat.arm2->transform->look;
+
+	//glm::translate(glm::mat4(1), ship1->transform->position) * glm::rotate(glm::mat4(1), glm::degrees(theta), glm::vec3(0, 1, 0
+	//glm::mat4 arm1LookMatrixRotated = arm1LookMatrix * glm::rotate(glm::mat4(1), 90, glm::vec3(0, 1, 0));
+	//glm::vec3 rotated = glm::rotate(arm1Look, 90, glm::vec3(0, 1, 0));
+	
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1), -90.0f, glm::vec3(1, 0, 0));
+	glm::vec4 arm1Look4 = glm::vec4(arm1Look.x, arm1Look.y, arm1Look.z, 1.0f);
+	glm::vec4 arm1Force = rotationMatrix * arm1Look4;
+	
+	glm::vec4 arm2Look4 = glm::vec4(arm2Look.x, arm2Look.y, arm2Look.z, 1.0f);
+	glm::vec4 arm2Force = rotationMatrix * arm2Look4;
+
+	
+	//glm::vec4 tempVec = glm::rotate(glm::mat4(1), 90.0f, glm::vec3(0, 1, 0)) * glm::vec4(arm1Look, 1.0);
+	//glm::vec3 arm1NewLook = glm::vec3(tempVec.x, tempVec.y, tempVec.z);
+
 	//animat.arm1->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
 	//animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
 
-	btVector3 force = timeDelta * 5000 * btVector3(0.0f, 1.0f, -0.5f);
-	animat.arm1->rigidBody->applyForce(force, btVector3(0.0f, 0.0f, -5 / 4));
-	animat.arm2->rigidBody->applyForce(force, btVector3(0.0f, 0.0f, -5 / 4));
+	//btVector3 force = timeDelta * 5000 * btVector3(0.0f, 1.0f, 0);
+	btVector3 forceArm1 = timeDelta * 5000 * btVector3(arm1Force.x, arm1Force.y, arm1Force.z);
+	btVector3 forceArm2 = timeDelta * 5000 * btVector3(arm2Force.x, arm2Force.y, arm2Force.z);
+	animat.arm1->rigidBody->applyForce(forceArm1, btVector3(0.0f, 0.0f, -5 / 4));
+	animat.arm2->rigidBody->applyForce(forceArm2, btVector3(0.0f, 0.0f, -5 / 4));
 	
+	
+
 	//animat.body->rigidBody->applyTorque(timeDelta * 100 * btVector3(0.0f, 100.0f, 0.0f));
 
 	Game::Update(timeDelta);

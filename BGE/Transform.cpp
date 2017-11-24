@@ -129,7 +129,8 @@ void Transform::Pitch(float angle, bool limitRotation)
 	
 	/*
 	glm::mat4 pitch;
-	pitch = glm::rotate(pitch, angle, transform->right);
+	pitch = 
+	(pitch, angle, transform->right);
 
 	glm::vec4 tlook = glm::vec4(look, 0);
 	tlook = pitch * tlook;
