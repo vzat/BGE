@@ -15,6 +15,12 @@ namespace BGE
 		shared_ptr<PhysicsController> arm2;
 	};
 
+	struct objSize {
+		float width;
+		float height;
+		float depth;
+	};
+
 	class AnimatGame : public Game
 	{
 	private:

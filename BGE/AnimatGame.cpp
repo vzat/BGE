@@ -43,8 +43,13 @@ bool AnimatGame::Initialise()
 
 void BGE::AnimatGame::Update(float timeDelta)
 {
-	animat.arm1->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
-	animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+	//animat.arm1->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+	//animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
+
+	btVector3 force = timeDelta * 5000 * btVector3(0.0f, 1.0f, -0.5f);
+	animat.arm1->rigidBody->applyForce(force, btVector3(0.0f, 0.0f, -5 / 4));
+	animat.arm2->rigidBody->applyForce(force, btVector3(0.0f, 0.0f, -5 / 4));
+	
 	//animat.body->rigidBody->applyTorque(timeDelta * 100 * btVector3(0.0f, 100.0f, 0.0f));
 
 	Game::Update(timeDelta);
@@ -97,17 +102,6 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	//dynamicsWorld->addConstraint(headBody);
 
 
-	// Reference: https://studiofreya.com/game-maker/bullet-physics/bullet-physics-how-to-change-body-mass/
-	//btRigidBody *rigidHead = head->rigidBody;
-	//dynamicsWorld->removeRigidBody(rigidHead);
-	//float headMass = 1.0f;
-	//btVector3 headInertia(0, 0, 0);
-	//rigidHead->getCollisionShape()->calculateLocalInertia(headMass, headInertia);
-	//rigidHead->setMassProps(headMass, headInertia);
-	//dynamicsWorld->addRigidBody(rigidHead);
-	// End Reference
-
-
 	// Arms
 	float armRadius = bodyWidth / 8;
 	float armLength = bodyLength / 2;
@@ -127,6 +121,25 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 4), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
 	arm2Body->setLimit(-4, 4);
 	dynamicsWorld->addConstraint(arm2Body);
+
+
+	// Add Stuff to the back
+	int noStuff = 1;
+	float stuffRadius = bodyWidth / 6;
+	glm::vec3 stuffOffset = glm::vec3(bodyWidth / 2, bodyHeight + stuffRadius * 2, 0);
+	for (int i = 0; i < noStuff; i++) {
+		shared_ptr<PhysicsController> stuff = physicsFactory->CreateBox(stuffRadius * 2, stuffRadius * 2, stuffRadius * 2, position + stuffOffset, glm::quat());
+
+		btTransform stuffBodyT, bodyStuffT;
+		bodyStuffT.setIdentity();
+		bodyStuffT.setOrigin(btVector3(0.0f, bodyHeight / 2, -bodyLength / 2));
+
+		stuffBodyT.setIdentity();
+		stuffBodyT.setOrigin(btVector3(0, -stuffRadius, 0));
+
+		btFixedConstraint *stuffBody = new btFixedConstraint(*stuff->rigidBody, *body->rigidBody, stuffBodyT, bodyStuffT);
+		dynamicsWorld->addConstraint(stuffBody);
+	}
 
 	zombieRigid zombie;
 
