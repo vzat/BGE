@@ -38,7 +38,7 @@ bool AnimatGame::Initialise()
 	}
 
 	//CreateAnimat(glm::vec3(0, 10, 0), 10);
-	animat = CreateZombie(glm::vec3(0, 10, 0), 5);
+	animat = CreateZombie(glm::vec3(0, 0, 0), 5);
 	//shark = CreateShark(glm::vec3(0, 10, 0), 5);
 
 	if (!Game::Initialise()) {
@@ -251,7 +251,6 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> arm1 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm1Offset, glm::quat());
 
 	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 4), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	//arm1Body->setLimit(-4, 4);
 	arm1Body->enableAngularMotor(true, 5, 10);
 	dynamicsWorld->addConstraint(arm1Body);
 
@@ -260,17 +259,56 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> arm2 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm2Offset, glm::quat());
 
 	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 4), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	//arm2Body->setLimit(-4, 4);
 	arm2Body->enableAngularMotor(true, 5, 10);
 	dynamicsWorld->addConstraint(arm2Body);
 
+	// Hands
+	float handWidth = armRadius * 3;
+	float handHeight = armRadius;
 
-	// Fingers
-	float fingerRadius = armRadius / 10;
-	float fingerLength = armLength / 10;
+	// Left Hand
+	glm::vec3 hand1Offset = glm::vec3(0, 0, -armLength / 2 - handWidth / 2);
+	shared_ptr<PhysicsController> hand1 = physicsFactory->CreateBox(handWidth, handHeight, handWidth, position + arm1Offset + hand1Offset, glm::quat());
 
-	// Left Arm Fingers
-	
+	btHingeConstraint *handArm1 = new btHingeConstraint(*hand1->rigidBody, *arm1->rigidBody, btVector3(0, 0, handWidth / 2), btVector3(hand1Offset.x, hand1Offset.y, hand1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	handArm1->setLimit(-3.14 / 4, 3.14 / 4);
+	dynamicsWorld->addConstraint(handArm1);
+
+	// Right Hand
+	glm::vec3 hand2Offset = glm::vec3(0, 0, -armLength / 2 - handWidth / 2);
+	shared_ptr<PhysicsController> hand2 = physicsFactory->CreateBox(handWidth, handHeight, handWidth, position + arm2Offset + hand2Offset, glm::quat());
+
+	btHingeConstraint *handArm2 = new btHingeConstraint(*hand2->rigidBody, *arm2->rigidBody, btVector3(0, 0, handWidth / 2), btVector3(hand2Offset.x, hand2Offset.y, hand2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	handArm1->setLimit(-3.14 / 4, 3.14 / 4);
+	dynamicsWorld->addConstraint(handArm2);
+
+
+	//// Fingers
+	//float fingerRadius = armRadius / 10;
+	//float fingerLength = armLength / 10;
+	//float noFingers = 3;
+	//float fingerDistance = armRadius * 2 / noFingers;
+
+	//// Left Hand Fingers
+	//for (int i = -noFingers / 2; i < noFingers / 2; i++) {
+	//	glm::vec3 arm1FingerOffset = glm::vec3(i * fingerDistance, -armRadius, -armLength / 2);
+	//	shared_ptr<PhysicsController> finger = physicsFactory->CreateBox(fingerRadius * 2, fingerRadius * 2, fingerLength, position + arm1Offset + arm1FingerOffset, glm::quat());
+	//	//finger->rigidBody->setMassProps(1.0f, btVector3(0, 0, 0));
+
+	//	btPoint2PointConstraint *fingerArm1 = new btPoint2PointConstraint(*finger->rigidBody, *arm1->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(arm1FingerOffset.x, arm1FingerOffset.y, arm1FingerOffset.z));
+	//	dynamicsWorld->addConstraint(fingerArm1);
+	//}
+
+	//// Right Hand Fingers
+	//for (int i = -noFingers / 2; i < noFingers / 2; i++) {
+	//	glm::vec3 arm2FingerOffset = glm::vec3(i * fingerDistance, -armRadius, -armLength / 2);
+	//	shared_ptr<PhysicsController> finger = physicsFactory->CreateBox(fingerRadius * 2, fingerRadius * 2, fingerLength, position + arm2Offset + arm2FingerOffset, glm::quat());
+	//	//finger->rigidBody->setMassProps(1.0f, btVector3(0, 0, 0));
+
+	//	btPoint2PointConstraint *fingerArm2 = new btPoint2PointConstraint(*finger->rigidBody, *arm2->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(arm2FingerOffset.x, arm2FingerOffset.y, arm2FingerOffset.z));
+	//	dynamicsWorld->addConstraint(fingerArm2);
+	//}
+
 
 
 	//Add Stuff to the back
