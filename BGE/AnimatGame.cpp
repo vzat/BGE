@@ -228,8 +228,9 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 
 	// Head
 	float headRadius = bodyWidth / 5;
-	glm::vec3 headOffset = glm::vec3(0, bodyHeight / 2 + 0.1f, bodyLength / 2);
+	glm::vec3 headOffset = glm::vec3(0, bodyHeight / 2 + headRadius, bodyLength / 2);
 	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
+	//shared_ptr<PhysicsController> head = physicsFactory->CreateBox(headRadius * 2, headRadius * 2, headRadius * 2, position + headOffset, glm::quat());
 
 	btTransform bodyHeadT, headBodyT;
 	bodyHeadT.setIdentity();
@@ -240,6 +241,95 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 
 	btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
 	dynamicsWorld->addConstraint(headBody);
+
+	// Christmas hat
+
+	// Hat Base
+	float baseRadius = headRadius;
+	float baseHeight = headRadius / 2;
+
+	glm::vec3 hatBaseOffset = glm::vec3(0, headRadius + baseHeight / 2, 0);
+	glm::quat bodyAngleQuat = glm::angleAxis(90.0f, glm::vec3(1, 0, 0));
+	shared_ptr<PhysicsController> hatBase = physicsFactory->CreateCylinder(baseRadius, baseHeight, position + headOffset + hatBaseOffset, bodyAngleQuat);
+
+	btTransform baseHatHeadT, headBaseHatT;
+	baseHatHeadT.setIdentity();
+	baseHatHeadT.setOrigin(btVector3(hatBaseOffset.x, hatBaseOffset.y, hatBaseOffset.z));
+
+	headBaseHatT.setIdentity();
+	headBaseHatT.setOrigin(btVector3(0, - baseHeight / 2, 0));
+
+	btFixedConstraint *baseHatHead = new btFixedConstraint(*hatBase->rigidBody, *head->rigidBody, headBaseHatT, baseHatHeadT);
+	dynamicsWorld->addConstraint(baseHatHead);
+
+	// Hat Top
+	float topRadius = baseRadius / 4;
+	float topLength = baseRadius * 2;
+
+	glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + topLength / 2, 0);
+	shared_ptr<PhysicsController> hatTop = physicsFactory->CreateBox(topRadius * 2, topLength, topRadius * 2, position + headOffset + hatBaseOffset + hatTopOffset, glm::quat());
+
+	btTransform topHatHeadT, headTopHatT;
+	baseHatHeadT.setIdentity();
+	baseHatHeadT.setOrigin(btVector3(hatTopOffset.x, hatTopOffset.y, hatTopOffset.z));
+
+	headBaseHatT.setIdentity();
+	headBaseHatT.setOrigin(btVector3(0, topLength / 2, 0));
+
+	btGeneric6DofConstraint *hatBaseTop = new btGeneric6DofConstraint(*hatTop->rigidBody, *hatBase->rigidBody, headBaseHatT, baseHatHeadT, true);
+	dynamicsWorld->addConstraint(hatBaseTop);
+
+	// Hat Ball
+	float ballRadius = topRadius * 2;
+	glm::vec3 ballOffset = glm::vec3(0, topLength / 2 + ballRadius, 0);
+	shared_ptr<PhysicsController> hatBall = physicsFactory->CreateSphere(ballRadius, position + headOffset + hatBaseOffset + hatTopOffset + ballOffset, glm::quat());
+
+	btTransform topHatBallT, ballTopHatT;
+	topHatBallT.setIdentity();
+	topHatBallT.setOrigin(btVector3(ballOffset.x, ballOffset.y, ballOffset.z));
+
+	ballTopHatT.setIdentity();
+	ballTopHatT.setOrigin(btVector3(0, -ballRadius, 0));
+
+	btFixedConstraint *topHatBall = new btFixedConstraint(*hatTop->rigidBody, *hatBall->rigidBody, ballTopHatT, topHatBallT);
+	dynamicsWorld->addConstraint(topHatBall);
+
+	//// Mouth
+	//float mouthLength = headRadius;
+	//float mouthRadius = mouthLength / 10;
+
+	//// Upper Lip
+	//glm::vec3 lip1Offset = glm::vec3(0, 0, headRadius + mouthRadius);
+	//shared_ptr<PhysicsController> lip1 = physicsFactory->CreateBox(mouthLength, mouthRadius * 2, mouthRadius * 2, position + headOffset + lip1Offset, glm::quat());
+
+	//btTransform headLipT, lipHeadT;
+	//headLipT.setIdentity();
+	//headLipT.setOrigin(btVector3(lip1Offset.x, lip1Offset.y, lip1Offset.z));
+
+	//lipHeadT.setIdentity();
+	//lipHeadT.setOrigin(btVector3(0, 0, 0));
+
+	//btFixedConstraint *lipHead = new btFixedConstraint(*lip1->rigidBody, *head->rigidBody, lipHeadT, headLipT);
+	//dynamicsWorld->addConstraint(lipHead);
+
+	//// Lower Lip
+	//glm::vec3 lip2Offset = glm::vec3(0, - mouthRadius * 2, headRadius + mouthRadius);
+	//shared_ptr<PhysicsController> lip2 = physicsFactory->CreateBox(mouthLength, mouthRadius * 2, mouthRadius * 2, position + headOffset + lip2Offset, glm::quat());
+
+	//btTransform lip1T, lip2T;
+	//lip1T.setIdentity();
+	//lip2T.setIdentity();
+
+	//glm::quat quat1 = glm::angleAxis(90.0f, glm::vec3(0, 1, 0));
+	//glm::quat quat2 = glm::angleAxis(90.0f, glm::vec3(0, 1, 0));
+	//lip1T.setRotation(btQuaternion(quat1.x, quat1.y, quat1.z, quat1.w));
+	//lip2T.setRotation(btQuaternion(quat2.x, quat2.y, quat2.z, quat2.w));
+
+	//btSliderConstraint *mouthSlider = new btSliderConstraint(*lip1->rigidBody, *lip2->rigidBody, lip1T, lip2T, true);
+	//mouthSlider->setLowerAngLimit(0);
+	//mouthSlider->setUpperAngLimit(2);
+	//dynamicsWorld->addConstraint(mouthSlider);
+
 
 
 	// Arms
