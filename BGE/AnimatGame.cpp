@@ -268,8 +268,9 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	float topRadius = baseRadius / 4;
 	float topLength = baseRadius * 2;
 
-	glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + 2 * topLength / 3, 0);
-	shared_ptr<PhysicsController> hatTop = physicsFactory->CreateBox(topRadius * 2, topLength, topRadius * 2, position + headOffset + hatBaseOffset + hatTopOffset, glm::quat());
+	//glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + 2 * topLength / 3, 0);
+	glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + topRadius * 2, 0);
+	shared_ptr<PhysicsController> hatTop = physicsFactory->CreateBox(topRadius * 2, topLength, topRadius * 2, position + headOffset + hatBaseOffset + hatTopOffset, bodyAngleQuat);
 
 	colourObject(hatTop, glm::vec3(100.0f, 0.0f, 0.0f));
 
