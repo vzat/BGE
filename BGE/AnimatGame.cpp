@@ -23,7 +23,7 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateGroundPhysics();
 	physicsFactory->CreateCameraPhysics();
 
-	//dynamicsWorld->setGravity(btVector3(0, -20, 0));
+	dynamicsWorld->setGravity(btVector3(0, -9, 0));
 
 	// Create Walls
 	int noWalls = rand() % 3 + 1;
@@ -38,8 +38,8 @@ bool AnimatGame::Initialise()
 	}
 
 	//CreateAnimat(glm::vec3(0, 10, 0), 10);
-	//animat = CreateZombie(glm::vec3(0, 10, 0), 5);
-	shark = CreateShark(glm::vec3(0, 10, 0), 5);
+	animat = CreateZombie(glm::vec3(0, 10, 0), 5);
+	//shark = CreateShark(glm::vec3(0, 10, 0), 5);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -114,50 +114,51 @@ void BGE::AnimatGame::Update(float timeDelta)
 		// 2 rectangles connected for an arm
 
 		
-		timeAcc += timeDelta;
-		
-		// Move Forward
-		if ((int)timeAcc % 2 == 0) {
-			tailDirection *= -1;
-			timeAcc++;
+		// SHARK
+		//timeAcc += timeDelta;
+		//
+		//// Move Forward
+		//if ((int)timeAcc % 2 == 0) {
+		//	tailDirection *= -1;
+		//	timeAcc++;
 
-			btVector3 bodyForce = timeDelta * 50 * btVector3(0.0f, 0.0f, 1.0f);
-			shark.body->rigidBody->applyCentralImpulse(bodyForce);
-		}
-		//btVector3 bodyForce = timeDelta * 10 * btVector3(0.0f, 0.0f, -1.0f);
-		//shark.body->rigidBody->applyCentralImpulse(bodyForce);
+		//	btVector3 bodyForce = timeDelta * 50 * btVector3(0.0f, 0.0f, 1.0f);
+		//	shark.body->rigidBody->applyCentralImpulse(bodyForce);
+		//}
+		////btVector3 bodyForce = timeDelta * 10 * btVector3(0.0f, 0.0f, -1.0f);
+		////shark.body->rigidBody->applyCentralImpulse(bodyForce);
 
-		// Move Tail
-		btVector3 tailForce = timeDelta * 50 * btVector3(tailDirection * 1.0f, 0.0f, 0.0f);
-		shark.tail->rigidBody->applyForce(tailForce, btVector3(0.0f, 0.0f, -5));
+		//// Move Tail
+		//btVector3 tailForce = timeDelta * 50 * btVector3(tailDirection * 1.0f, 0.0f, 0.0f);
+		//shark.tail->rigidBody->applyForce(tailForce, btVector3(0.0f, 0.0f, -5));
 
-		// Change Direction
-		if ((int)timeAcc % 5 == 0) {
-			sharkDirection = rand() % 5;
-			timeAcc++;
-		}
+		//// Change Direction
+		//if ((int)timeAcc % 5 == 0) {
+		//	sharkDirection = rand() % 5;
+		//	timeAcc++;
+		//}
 
-		btVector3 directionForce;
-		float directionScale = 10;
+		//btVector3 directionForce;
+		//float directionScale = 10;
 
-		switch ((int)sharkDirection) {
-		case 1:
-			directionForce = timeDelta * directionScale * btVector3(0.0f, 0.0f, 1.0f);
-			break;
-		case 2:
-			directionForce = timeDelta * directionScale * btVector3(-1.0f, 0.0f, 0.0f);
-			break;
-		case 3:
-			directionForce = timeDelta * directionScale * btVector3(0.0f, 1.0f, 0.0f);
-			break;
-		case 4:
-			directionForce = timeDelta * directionScale * btVector3(0.0f, -1.0f, 0.0f);
-			break;
-		default:
-			directionForce = timeDelta * directionScale * btVector3(0.0f, 0.0f, 0.0f);
-			break;
-		}
-		shark.body->rigidBody->applyForce(directionForce, btVector3(0.0f, 0.0f, 5));
+		//switch ((int)sharkDirection) {
+		//case 1:
+		//	directionForce = timeDelta * directionScale * btVector3(0.0f, 0.0f, 1.0f);
+		//	break;
+		//case 2:
+		//	directionForce = timeDelta * directionScale * btVector3(-1.0f, 0.0f, 0.0f);
+		//	break;
+		//case 3:
+		//	directionForce = timeDelta * directionScale * btVector3(0.0f, 1.0f, 0.0f);
+		//	break;
+		//case 4:
+		//	directionForce = timeDelta * directionScale * btVector3(0.0f, -1.0f, 0.0f);
+		//	break;
+		//default:
+		//	directionForce = timeDelta * directionScale * btVector3(0.0f, 0.0f, 0.0f);
+		//	break;
+		//}
+		//shark.body->rigidBody->applyForce(directionForce, btVector3(0.0f, 0.0f, 5));
 
 		
 
@@ -209,8 +210,6 @@ sharkRigid BGE::AnimatGame::CreateShark(glm::vec3 position, float totalSize) {
 	tailBody->setLimit(- 0.78f, 0.78f);
 	dynamicsWorld->addConstraint(tailBody);
 
-	//obj->rigidBody->setMassProps(btScalar(2), btVector3(0, 0, 0));
-
 	sharkRigid shark;
 	shark.body = body;
 	shark.tail = tail;
@@ -227,19 +226,20 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
 
 	// Head
-	//float headRadius = bodyWidth / 8;
-	//glm::vec3 headOffset = glm::vec3(0, 0, bodyLength / 2 + headRadius + 0.1);
-	//shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
+	float headRadius = bodyWidth / 8;
+	glm::vec3 headOffset = glm::vec3(0, 0, bodyLength / 2 + headRadius + 0.1);
+	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
+	//head->rigidBody->setMassProps(10.0f, btVector3(0, 0, 0));
 
-	//btTransform bodyHeadT, headBodyT;
-	//bodyHeadT.setIdentity();
-	//bodyHeadT.setOrigin(btVector3(0, 0, headOffset.z));
+	btTransform bodyHeadT, headBodyT;
+	bodyHeadT.setIdentity();
+	bodyHeadT.setOrigin(btVector3(0, 0, headOffset.z));
 
-	//headBodyT.setIdentity();
-	//headBodyT.setOrigin(btVector3(0, 0, headRadius));
+	headBodyT.setIdentity();
+	headBodyT.setOrigin(btVector3(0, 0, headRadius));
 
-	//btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
-	//dynamicsWorld->addConstraint(headBody);
+	btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
+	dynamicsWorld->addConstraint(headBody);
 
 
 	// Arms
@@ -251,7 +251,8 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> arm1 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm1Offset, glm::quat());
 
 	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 4), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	arm1Body->setLimit(-4, 4);
+	//arm1Body->setLimit(-4, 4);
+	arm1Body->enableAngularMotor(true, 5, 10);
 	dynamicsWorld->addConstraint(arm1Body);
 
 	// Right Arm
@@ -259,27 +260,36 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	shared_ptr<PhysicsController> arm2 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm2Offset, glm::quat());
 
 	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 4), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	arm2Body->setLimit(-4, 4);
+	//arm2Body->setLimit(-4, 4);
+	arm2Body->enableAngularMotor(true, 5, 10);
 	dynamicsWorld->addConstraint(arm2Body);
 
 
+	// Fingers
+	float fingerRadius = armRadius / 10;
+	float fingerLength = armLength / 10;
+
+	// Left Arm Fingers
+	
+
+
 	//Add Stuff to the back
-	int noStuff = 1;
-	float stuffRadius = bodyWidth / 6;
-	glm::vec3 stuffOffset = glm::vec3(bodyWidth / 2, -bodyHeight - stuffRadius * 2, 0);
-	for (int i = 0; i < noStuff; i++) {
-		shared_ptr<PhysicsController> stuff = physicsFactory->CreateBox(stuffRadius * 2, stuffRadius * 2, stuffRadius * 2, position + stuffOffset, glm::quat());
+	//int noStuff = 1;
+	//float stuffRadius = bodyWidth / 6;
+	//glm::vec3 stuffOffset = glm::vec3(bodyWidth / 2, -bodyHeight - stuffRadius * 2, 0);
+	//for (int i = 0; i < noStuff; i++) {
+	//	shared_ptr<PhysicsController> stuff = physicsFactory->CreateBox(stuffRadius * 2, stuffRadius * 2, stuffRadius * 2, position + stuffOffset, glm::quat());
 
-		btTransform stuffBodyT, bodyStuffT;
-		bodyStuffT.setIdentity();
-		bodyStuffT.setOrigin(btVector3(0.0f, -bodyHeight / 2, -bodyLength / 2));
+	//	btTransform stuffBodyT, bodyStuffT;
+	//	bodyStuffT.setIdentity();
+	//	bodyStuffT.setOrigin(btVector3(0.0f, -bodyHeight / 2, -bodyLength / 2));
 
-		stuffBodyT.setIdentity();
-		stuffBodyT.setOrigin(btVector3(0, stuffRadius, 0));
+	//	stuffBodyT.setIdentity();
+	//	stuffBodyT.setOrigin(btVector3(0, stuffRadius, 0));
 
-		btFixedConstraint *stuffBody = new btFixedConstraint(*stuff->rigidBody, *body->rigidBody, stuffBodyT, bodyStuffT);
-		dynamicsWorld->addConstraint(stuffBody);
-	}
+	//	btFixedConstraint *stuffBody = new btFixedConstraint(*stuff->rigidBody, *body->rigidBody, stuffBodyT, bodyStuffT);
+	//	dynamicsWorld->addConstraint(stuffBody);
+	//}
 
 	zombieRigid zombie;
 
