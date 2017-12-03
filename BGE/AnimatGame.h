@@ -16,6 +16,11 @@ namespace BGE
 		shared_ptr<PhysicsController> arm2;
 	};
 
+	struct sharkRigid {
+		shared_ptr<PhysicsController> body;
+		shared_ptr<PhysicsController> tail;
+	};
+
 	struct objSize {
 		float width;
 		float height;
@@ -36,13 +41,19 @@ namespace BGE
 		std::vector<std::vector<shared_ptr<PhysicsController>>> CreateWall(glm::vec3 position, int blockSize, int noWidth, int noHeight);
 		shared_ptr<PhysicsController> CreateAnimat(glm::vec3 position, float totalSize);
 		zombieRigid CreateZombie(glm::vec3 position, float totalSize);
+		sharkRigid CreateShark(glm::vec3 position, float totalSize);
+
 		float getPercentage(float value, float percentage);
 
 		btQuaternion toBtQuat(glm::quat quat);
 		zombieRigid animat;
+		sharkRigid shark;
 
 		bool move;
 		float arm1Scale, arm2Scale, bodyScale;
+		float timeAcc;
+		float tailDirection;
+		float sharkDirection;
 	};
 }
 

@@ -9,6 +9,9 @@ AnimatGame::AnimatGame(void)
 	arm1Scale = 0;
 	arm2Scale = 0;
 	bodyScale = 300;
+	timeAcc = 0;
+	tailDirection = 1;
+	sharkDirection = 0;
 }
 
 AnimatGame::~AnimatGame(void)
@@ -20,7 +23,7 @@ bool AnimatGame::Initialise()
 	physicsFactory->CreateGroundPhysics();
 	physicsFactory->CreateCameraPhysics();
 
-	dynamicsWorld->setGravity(btVector3(0, -20, 0));
+	//dynamicsWorld->setGravity(btVector3(0, -20, 0));
 
 	// Create Walls
 	int noWalls = rand() % 3 + 1;
@@ -35,7 +38,8 @@ bool AnimatGame::Initialise()
 	}
 
 	//CreateAnimat(glm::vec3(0, 10, 0), 10);
-	animat = CreateZombie(glm::vec3(0, 10, 0), 5);
+	//animat = CreateZombie(glm::vec3(0, 10, 0), 5);
+	shark = CreateShark(glm::vec3(0, 10, 0), 5);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -53,9 +57,9 @@ void BGE::AnimatGame::Update(float timeDelta)
 	}
 
 	if (move) {
-		glm::vec3 bodyLook = animat.body->transform->look;
-		glm::vec3 arm1Look = animat.arm1->transform->look;
-		glm::vec3 arm2Look = animat.arm2->transform->look;
+		//glm::vec3 bodyLook = animat.body->transform->look;
+		//glm::vec3 arm1Look = animat.arm1->transform->look;
+		//glm::vec3 arm2Look = animat.arm2->transform->look;
 
 		//glm::translate(glm::mat4(1), ship1->transform->position) * glm::rotate(glm::mat4(1), glm::degrees(theta), glm::vec3(0, 1, 0
 		//glm::mat4 arm1LookMatrixRotated = arm1LookMatrix * glm::rotate(glm::mat4(1), 90, glm::vec3(0, 1, 0));
@@ -76,31 +80,31 @@ void BGE::AnimatGame::Update(float timeDelta)
 		//animat.arm2->rigidBody->applyTorque(timeDelta * 100 * btVector3(500.0f, 0.0f, 0.0f));
 
 
-		btVector3 totalForce = animat.arm1->rigidBody->getLinearVelocity();
-		float arm1TotalForce = sqrt(pow(totalForce.getX(), 2) + pow(totalForce.getY(), 2) + pow(totalForce.getZ(), 2));
+		//btVector3 totalForce = animat.arm1->rigidBody->getLinearVelocity();
+		//float arm1TotalForce = sqrt(pow(totalForce.getX(), 2) + pow(totalForce.getY(), 2) + pow(totalForce.getZ(), 2));
 
-		totalForce = animat.arm2->rigidBody->getLinearVelocity();
-		float arm2TotalForce = sqrt(pow(totalForce.getX(), 2) + pow(totalForce.getY(), 2) + pow(totalForce.getZ(), 2));
+		//totalForce = animat.arm2->rigidBody->getLinearVelocity();
+		//float arm2TotalForce = sqrt(pow(totalForce.getX(), 2) + pow(totalForce.getY(), 2) + pow(totalForce.getZ(), 2));
 
-		cout << arm1TotalForce << " " << arm2TotalForce << endl;
+		//cout << arm1TotalForce << " " << arm2TotalForce << endl;
 
-		float scale = 20.0f;
-		arm1Scale = abs(arm1TotalForce) < 5 ? arm1Scale + scale : arm1Scale - scale;
-		arm2Scale = abs(arm2TotalForce) < 5 ? arm2Scale + scale : arm2Scale - scale;
+		//float scale = 20.0f;
+		//arm1Scale = abs(arm1TotalForce) < 5 ? arm1Scale + scale : arm1Scale - scale;
+		//arm2Scale = abs(arm2TotalForce) < 5 ? arm2Scale + scale : arm2Scale - scale;
 
-		arm1Scale = arm1Scale < 0 ? 0 : arm1Scale;
-		arm2Scale = arm2Scale < 0 ? 0 : arm2Scale;
-		
-		cout << arm1Scale << " " << arm2Scale << endl << endl;
+		//arm1Scale = arm1Scale < 0 ? 0 : arm1Scale;
+		//arm2Scale = arm2Scale < 0 ? 0 : arm2Scale;
+		//
+		//cout << arm1Scale << " " << arm2Scale << endl << endl;
 
 		
 		//btVector3 force = timeDelta * 5000 * btVector3(0.0f, 1.0f, 0);
-		btVector3 forceArm1 = timeDelta * arm1Scale * btVector3(0.0f, 1.0f, 0.0f);
-		btVector3 forceArm2 = timeDelta * arm2Scale * btVector3(0.0f, 1.0f, 0.0f);
-		btVector3 forceBody = timeDelta * 300 * btVector3(0.0f, 0.0f, 1.0f);
-		animat.arm1->rigidBody->applyForce(forceArm1, btVector3(0.0f, 0.0f, -5 / 4));
-		animat.arm2->rigidBody->applyForce(forceArm2, btVector3(0.0f, 0.0f, -5 / 4));
-		animat.body->rigidBody->applyCentralImpulse(forceBody);
+		//btVector3 forceArm1 = timeDelta * 1000 * btVector3(0.0f, 1.0f, 0.0f);
+		//btVector3 forceArm2 = timeDelta * 1000 * btVector3(0.0f, 1.0f, 0.0f);
+		//btVector3 forceBody = timeDelta * 300 * btVector3(0.0f, 0.0f, 1.0f);
+		//animat.arm1->rigidBody->applyForce(forceArm1, btVector3(0.0f, 0.0f, -5 / 4));
+		//animat.arm2->rigidBody->applyForce(forceArm2, btVector3(0.0f, 0.0f, -5 / 4));
+		//animat.body->rigidBody->applyCentralImpulse(forceBody);
 
 
 		//animat.body->rigidBody->applyTorque(timeDelta * 100 * btVector3(0.0f, 100.0f, 0.0f));
@@ -108,6 +112,55 @@ void BGE::AnimatGame::Update(float timeDelta)
 		// Ideas:
 		// Fish swimming
 		// 2 rectangles connected for an arm
+
+		
+		timeAcc += timeDelta;
+		
+		// Move Forward
+		if ((int)timeAcc % 2 == 0) {
+			tailDirection *= -1;
+			timeAcc++;
+
+			btVector3 bodyForce = timeDelta * 50 * btVector3(0.0f, 0.0f, 1.0f);
+			shark.body->rigidBody->applyCentralImpulse(bodyForce);
+		}
+		//btVector3 bodyForce = timeDelta * 10 * btVector3(0.0f, 0.0f, -1.0f);
+		//shark.body->rigidBody->applyCentralImpulse(bodyForce);
+
+		// Move Tail
+		btVector3 tailForce = timeDelta * 50 * btVector3(tailDirection * 1.0f, 0.0f, 0.0f);
+		shark.tail->rigidBody->applyForce(tailForce, btVector3(0.0f, 0.0f, -5));
+
+		// Change Direction
+		if ((int)timeAcc % 5 == 0) {
+			sharkDirection = rand() % 5;
+			timeAcc++;
+		}
+
+		btVector3 directionForce;
+		float directionScale = 10;
+
+		switch ((int)sharkDirection) {
+		case 1:
+			directionForce = timeDelta * directionScale * btVector3(0.0f, 0.0f, 1.0f);
+			break;
+		case 2:
+			directionForce = timeDelta * directionScale * btVector3(-1.0f, 0.0f, 0.0f);
+			break;
+		case 3:
+			directionForce = timeDelta * directionScale * btVector3(0.0f, 1.0f, 0.0f);
+			break;
+		case 4:
+			directionForce = timeDelta * directionScale * btVector3(0.0f, -1.0f, 0.0f);
+			break;
+		default:
+			directionForce = timeDelta * directionScale * btVector3(0.0f, 0.0f, 0.0f);
+			break;
+		}
+		shark.body->rigidBody->applyForce(directionForce, btVector3(0.0f, 0.0f, 5));
+
+		
+
 	}
 
 	Game::Update(timeDelta);
@@ -134,6 +187,35 @@ std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateW
 	}
 
 	return wall;
+}
+
+sharkRigid BGE::AnimatGame::CreateShark(glm::vec3 position, float totalSize) {
+	float offset = 1;
+
+	// Body
+	float bodyLength = totalSize;
+	float bodyRadius = bodyLength / 10;
+	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyRadius * 2, bodyRadius * 2, bodyLength, position, glm::quat());
+
+
+	// Tail
+	float tailHeight = bodyRadius * 3;
+	float tailWidth = tailHeight / 2;
+	float tailDepth = tailWidth / 10;
+	glm::vec3 tailOffset = glm::vec3(0, 0, - (bodyLength / 2 + tailWidth / 2));
+	shared_ptr<PhysicsController> tail = physicsFactory->CreateBox(tailDepth, tailHeight, tailWidth, position + tailOffset, glm::quat());
+
+	btHingeConstraint *tailBody = new btHingeConstraint(*tail->rigidBody, *body->rigidBody, btVector3(0, 0, tailDepth / 2), btVector3(tailOffset.x, tailOffset.y, tailOffset.z), btVector3(0, 1, 0), btVector3(0, 1, 0));
+	tailBody->setLimit(- 0.78f, 0.78f);
+	dynamicsWorld->addConstraint(tailBody);
+
+	//obj->rigidBody->setMassProps(btScalar(2), btVector3(0, 0, 0));
+
+	sharkRigid shark;
+	shark.body = body;
+	shark.tail = tail;
+
+	return shark;
 }
 
 zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
