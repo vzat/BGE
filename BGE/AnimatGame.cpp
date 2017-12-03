@@ -222,15 +222,15 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	// Body
 	float bodyLength = totalSize;
 	float bodyWidth = bodyLength / 2;
-	float bodyHeight = bodyWidth / 2;
+	float bodyHeight = bodyWidth / 3;
 	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
-
+	colourObject(body, glm::vec3(0.0f, 20.0f, 70.0f));
 
 	// Head
 	float headRadius = bodyWidth / 5;
 	glm::vec3 headOffset = glm::vec3(0, bodyHeight / 2 + headRadius, bodyLength / 2);
 	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
-	//shared_ptr<PhysicsController> head = physicsFactory->CreateBox(headRadius * 2, headRadius * 2, headRadius * 2, position + headOffset, glm::quat());
+	colourObject(head, glm::vec3(55.0f, 15.0f, 90.0f));
 
 	btTransform bodyHeadT, headBodyT;
 	bodyHeadT.setIdentity();
@@ -248,9 +248,11 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	float baseRadius = headRadius;
 	float baseHeight = headRadius / 2;
 
-	glm::vec3 hatBaseOffset = glm::vec3(0, headRadius + baseHeight / 2, 0);
+	glm::vec3 hatBaseOffset = glm::vec3(0, headRadius, 0);
 	glm::quat bodyAngleQuat = glm::angleAxis(90.0f, glm::vec3(1, 0, 0));
 	shared_ptr<PhysicsController> hatBase = physicsFactory->CreateCylinder(baseRadius, baseHeight, position + headOffset + hatBaseOffset, bodyAngleQuat);
+
+	colourObject(hatBase, glm::vec3(100.0f, 0.0f, 0.0f));
 
 	btTransform baseHatHeadT, headBaseHatT;
 	baseHatHeadT.setIdentity();
@@ -266,8 +268,10 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	float topRadius = baseRadius / 4;
 	float topLength = baseRadius * 2;
 
-	glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + topLength / 2, 0);
+	glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + 2 * topLength / 3, 0);
 	shared_ptr<PhysicsController> hatTop = physicsFactory->CreateBox(topRadius * 2, topLength, topRadius * 2, position + headOffset + hatBaseOffset + hatTopOffset, glm::quat());
+
+	colourObject(hatTop, glm::vec3(100.0f, 0.0f, 0.0f));
 
 	btTransform topHatHeadT, headTopHatT;
 	baseHatHeadT.setIdentity();
@@ -281,8 +285,12 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 
 	// Hat Ball
 	float ballRadius = topRadius * 2;
-	glm::vec3 ballOffset = glm::vec3(0, topLength / 2 + ballRadius, 0);
+	glm::vec3 ballOffset = glm::vec3(0, topLength / 2, 0);
 	shared_ptr<PhysicsController> hatBall = physicsFactory->CreateSphere(ballRadius, position + headOffset + hatBaseOffset + hatTopOffset + ballOffset, glm::quat());
+
+	((shared_ptr<GameComponent>) hatBall)->transform->diffuse = glm::vec3(255.0f, 255.0f, 255.0f);
+	((shared_ptr<GameComponent>) hatBall)->transform->specular = glm::vec3(255.0f, 255.0f, 255.0f);
+	((shared_ptr<GameComponent>) hatBall)->transform->ambient = glm::vec3(255.0f, 255.0f, 255.0f);
 
 	btTransform topHatBallT, ballTopHatT;
 	topHatBallT.setIdentity();
@@ -339,6 +347,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	// Left Arm
 	glm::vec3 arm1Offset = glm::vec3(bodyWidth / 2 + armRadius, 0, bodyLength / 2 - armLength / 8);
 	shared_ptr<PhysicsController> arm1 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm1Offset, glm::quat());
+	colourObject(arm1, glm::vec3(55.0f, 15.0f, 90.0f));
 
 	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 2), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
 	arm1Body->enableAngularMotor(true, 12, 17);
@@ -347,6 +356,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	// Right Arm
 	glm::vec3 arm2Offset = glm::vec3(- bodyWidth / 2 - armRadius, 0, bodyLength / 2 - armLength / 8);
 	shared_ptr<PhysicsController> arm2 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm2Offset, glm::quat());
+	colourObject(arm2, glm::vec3(55.0f, 15.0f, 90.0f));
 
 	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 2), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
 	arm2Body->enableAngularMotor(true, 12, 17);
@@ -359,6 +369,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	// Left Hand
 	glm::vec3 hand1Offset = glm::vec3(0, 0, -armLength / 2 - handWidth / 2);
 	shared_ptr<PhysicsController> hand1 = physicsFactory->CreateBox(handWidth, handHeight, handWidth, position + arm1Offset + hand1Offset, glm::quat());
+	colourObject(hand1, glm::vec3(55.0f, 15.0f, 90.0f));
 
 	btHingeConstraint *handArm1 = new btHingeConstraint(*hand1->rigidBody, *arm1->rigidBody, btVector3(0, 0, handWidth / 2), btVector3(hand1Offset.x, hand1Offset.y, hand1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
 	handArm1->setLimit(-3.14 / 2, 3.14 / 2);
@@ -367,6 +378,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	// Right Hand
 	glm::vec3 hand2Offset = glm::vec3(0, 0, -armLength / 2 - handWidth / 2);
 	shared_ptr<PhysicsController> hand2 = physicsFactory->CreateBox(handWidth, handHeight, handWidth, position + arm2Offset + hand2Offset, glm::quat());
+	colourObject(hand2, glm::vec3(55.0f, 15.0f, 90.0f));
 
 	btHingeConstraint *handArm2 = new btHingeConstraint(*hand2->rigidBody, *arm2->rigidBody, btVector3(0, 0, handWidth / 2), btVector3(hand2Offset.x, hand2Offset.y, hand2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
 	handArm1->setLimit(-3.14 / 2, 3.14 / 2);
@@ -383,7 +395,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	for (int i = -noFingers / 2; i < noFingers / 2; i++) {
 		glm::vec3 arm1FingerOffset = glm::vec3(i * fingerDistance, 0, -handWidth / 2);
 		shared_ptr<PhysicsController> finger = physicsFactory->CreateBox(fingerRadius * 2, fingerRadius * 2, fingerLength, position + arm1Offset + hand1Offset + arm1FingerOffset, glm::quat());
-		//finger->rigidBody->setMassProps(1.0f, btVector3(0, 0, 0));
+		//colourObject(finger, glm::vec3(55.0f, 15.0f, 90.0f));
 
 		btPoint2PointConstraint *fingerHand1 = new btPoint2PointConstraint(*finger->rigidBody, *hand1->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(arm1FingerOffset.x, arm1FingerOffset.y, arm1FingerOffset.z));
 		dynamicsWorld->addConstraint(fingerHand1);
@@ -393,7 +405,7 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	for (int i = -noFingers / 2; i < noFingers / 2; i++) {
 		glm::vec3 arm2FingerOffset = glm::vec3(i * fingerDistance, 0, -handWidth / 2);
 		shared_ptr<PhysicsController> finger = physicsFactory->CreateBox(fingerRadius * 2, fingerRadius * 2, fingerLength, position + arm2Offset + hand2Offset + arm2FingerOffset, glm::quat());
-		//finger->rigidBody->setMassProps(1.0f, btVector3(0, 0, 0));
+		//colourObject(finger, glm::vec3(55.0f, 15.0f, 90.0f));
 
 		btPoint2PointConstraint *fingerHand2 = new btPoint2PointConstraint(*finger->rigidBody, *hand2->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(arm2FingerOffset.x, arm2FingerOffset.y, arm2FingerOffset.z));
 		dynamicsWorld->addConstraint(fingerHand2);
@@ -492,4 +504,10 @@ float BGE::AnimatGame::getPercentage(float value, float percentage)
 btQuaternion BGE::AnimatGame::toBtQuat(glm::quat quat)
 {
 	return btQuaternion(quat[0], quat[1], quat[2], quat[3]);
+}
+
+void BGE::AnimatGame::colourObject(shared_ptr<PhysicsController> object, glm::vec3 colour) {
+	((shared_ptr<GameComponent>) object)->transform->diffuse = colour / 255.0f;
+	((shared_ptr<GameComponent>) object)->transform->specular = colour / 255.0f;
+	((shared_ptr<GameComponent>) object)->transform->ambient = colour / 255.0f;
 }

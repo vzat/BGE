@@ -42,6 +42,7 @@ namespace BGE
 		shared_ptr<PhysicsController> CreateAnimat(glm::vec3 position, float totalSize);
 		zombieRigid CreateZombie(glm::vec3 position, float totalSize);
 		sharkRigid CreateShark(glm::vec3 position, float totalSize);
+		void colourObject(shared_ptr<PhysicsController> object, glm::vec3 colour);
 
 		float getPercentage(float value, float percentage);
 
