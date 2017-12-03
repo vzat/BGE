@@ -227,14 +227,13 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 
 
 	// Head
-	float headRadius = bodyWidth / 8;
-	glm::vec3 headOffset = glm::vec3(0, 0, bodyLength / 2 + headRadius + 0.1);
+	float headRadius = bodyWidth / 5;
+	glm::vec3 headOffset = glm::vec3(0, bodyHeight / 2 + 0.1f, bodyLength / 2);
 	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
-	//head->rigidBody->setMassProps(10.0f, btVector3(0, 0, 0));
 
 	btTransform bodyHeadT, headBodyT;
 	bodyHeadT.setIdentity();
-	bodyHeadT.setOrigin(btVector3(0, 0, headOffset.z));
+	bodyHeadT.setOrigin(btVector3(headOffset.x, headOffset.y, headOffset.z));
 
 	headBodyT.setIdentity();
 	headBodyT.setOrigin(btVector3(0, 0, headRadius));
@@ -248,19 +247,19 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	float armLength = bodyLength / 2;
 
 	// Left Arm
-	glm::vec3 arm1Offset = glm::vec3(bodyWidth / 2 + armRadius, 0, bodyLength / 2 + armLength / 4);
+	glm::vec3 arm1Offset = glm::vec3(bodyWidth / 2 + armRadius, 0, bodyLength / 2 - armLength / 8);
 	shared_ptr<PhysicsController> arm1 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm1Offset, glm::quat());
 
-	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 4), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	arm1Body->enableAngularMotor(true, 10, 15);
+	btHingeConstraint *arm1Body = new btHingeConstraint(*arm1->rigidBody, *body->rigidBody, btVector3(-armRadius, 0, armLength / 2), btVector3(arm1Offset.x, arm1Offset.y, arm1Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	arm1Body->enableAngularMotor(true, 12, 17);
 	dynamicsWorld->addConstraint(arm1Body);
 
 	// Right Arm
-	glm::vec3 arm2Offset = glm::vec3(- bodyWidth / 2 - armRadius, 0, bodyLength / 2 + armLength / 4);
+	glm::vec3 arm2Offset = glm::vec3(- bodyWidth / 2 - armRadius, 0, bodyLength / 2 - armLength / 8);
 	shared_ptr<PhysicsController> arm2 = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, position + arm2Offset, glm::quat());
 
-	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 4), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	arm2Body->enableAngularMotor(true, 10, 15);
+	btHingeConstraint *arm2Body = new btHingeConstraint(*arm2->rigidBody, *body->rigidBody, btVector3(+armRadius, 0, armLength / 2), btVector3(arm2Offset.x, arm2Offset.y, arm2Offset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
+	arm2Body->enableAngularMotor(true, 12, 17);
 	dynamicsWorld->addConstraint(arm2Body);
 
 	// Hands
@@ -309,6 +308,8 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 		btPoint2PointConstraint *fingerHand2 = new btPoint2PointConstraint(*finger->rigidBody, *hand2->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(arm2FingerOffset.x, arm2FingerOffset.y, arm2FingerOffset.z));
 		dynamicsWorld->addConstraint(fingerHand2);
 	}
+
+	//head->rigidBody->setMassProps(10.0f, btVector3(0, 0, 0));
 
 	zombieRigid zombie;
 
