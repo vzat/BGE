@@ -44,6 +44,8 @@ namespace BGE
 		sharkRigid CreateShark(glm::vec3 position, float totalSize);
 		void colourObject(shared_ptr<PhysicsController> object, glm::vec3 colour);
 		void CreateHat(shared_ptr<PhysicsController> head, glm::vec3 headPosition, float headRadius, float radius, float height);
+		void CreateArm(shared_ptr<PhysicsController> body, glm::vec3 bodyPosition, glm::vec3 armOffset, float armLength, float armRadius, bool right);
+		void CreateHand(shared_ptr<PhysicsController> arm, glm::vec3 armPosition, glm::vec3 handOffset, float handWidth, float handHeight);
 
 		float getPercentage(float value, float percentage);
 
