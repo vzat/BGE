@@ -43,6 +43,7 @@ namespace BGE
 		zombieRigid CreateZombie(glm::vec3 position, float totalSize);
 		sharkRigid CreateShark(glm::vec3 position, float totalSize);
 		void colourObject(shared_ptr<PhysicsController> object, glm::vec3 colour);
+		void CreateHat(shared_ptr<PhysicsController> head, glm::vec3 headPosition, float headRadius, float radius, float height);
 
 		float getPercentage(float value, float percentage);
 

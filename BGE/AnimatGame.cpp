@@ -242,66 +242,9 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
 	dynamicsWorld->addConstraint(headBody);
 
-	// Christmas hat
+	// Hat
+	CreateHat(head, position + headOffset, headRadius, headRadius, headRadius);
 
-	// Hat Base
-	float baseRadius = headRadius;
-	float baseHeight = headRadius / 2;
-
-	glm::vec3 hatBaseOffset = glm::vec3(0, headRadius, 0);
-	glm::quat bodyAngleQuat = glm::angleAxis(90.0f, glm::vec3(1, 0, 0));
-	shared_ptr<PhysicsController> hatBase = physicsFactory->CreateCylinder(baseRadius, baseHeight, position + headOffset + hatBaseOffset, bodyAngleQuat);
-
-	colourObject(hatBase, glm::vec3(100.0f, 0.0f, 0.0f));
-
-	btTransform baseHatHeadT, headBaseHatT;
-	baseHatHeadT.setIdentity();
-	baseHatHeadT.setOrigin(btVector3(hatBaseOffset.x, hatBaseOffset.y, hatBaseOffset.z));
-
-	headBaseHatT.setIdentity();
-	headBaseHatT.setOrigin(btVector3(0, - baseHeight / 2, 0));
-
-	btFixedConstraint *baseHatHead = new btFixedConstraint(*hatBase->rigidBody, *head->rigidBody, headBaseHatT, baseHatHeadT);
-	dynamicsWorld->addConstraint(baseHatHead);
-
-	// Hat Top
-	float topRadius = baseRadius / 4;
-	float topLength = baseRadius * 2;
-
-	//glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + 2 * topLength / 3, 0);
-	glm::vec3 hatTopOffset = glm::vec3(0, baseHeight / 2 + topRadius * 2, 0);
-	shared_ptr<PhysicsController> hatTop = physicsFactory->CreateBox(topRadius * 2, topLength, topRadius * 2, position + headOffset + hatBaseOffset + hatTopOffset, bodyAngleQuat);
-
-	colourObject(hatTop, glm::vec3(100.0f, 0.0f, 0.0f));
-
-	btTransform topHatHeadT, headTopHatT;
-	baseHatHeadT.setIdentity();
-	baseHatHeadT.setOrigin(btVector3(hatTopOffset.x, hatTopOffset.y, hatTopOffset.z));
-
-	headBaseHatT.setIdentity();
-	headBaseHatT.setOrigin(btVector3(0, topLength / 2, 0));
-
-	btGeneric6DofConstraint *hatBaseTop = new btGeneric6DofConstraint(*hatTop->rigidBody, *hatBase->rigidBody, headBaseHatT, baseHatHeadT, true);
-	dynamicsWorld->addConstraint(hatBaseTop);
-
-	// Hat Ball
-	float ballRadius = topRadius * 2;
-	glm::vec3 ballOffset = glm::vec3(0, topLength / 2, 0);
-	shared_ptr<PhysicsController> hatBall = physicsFactory->CreateSphere(ballRadius, position + headOffset + hatBaseOffset + hatTopOffset + ballOffset, glm::quat());
-
-	((shared_ptr<GameComponent>) hatBall)->transform->diffuse = glm::vec3(255.0f, 255.0f, 255.0f);
-	((shared_ptr<GameComponent>) hatBall)->transform->specular = glm::vec3(255.0f, 255.0f, 255.0f);
-	((shared_ptr<GameComponent>) hatBall)->transform->ambient = glm::vec3(255.0f, 255.0f, 255.0f);
-
-	btTransform topHatBallT, ballTopHatT;
-	topHatBallT.setIdentity();
-	topHatBallT.setOrigin(btVector3(ballOffset.x, ballOffset.y, ballOffset.z));
-
-	ballTopHatT.setIdentity();
-	ballTopHatT.setOrigin(btVector3(0, -ballRadius, 0));
-
-	btFixedConstraint *topHatBall = new btFixedConstraint(*hatTop->rigidBody, *hatBall->rigidBody, ballTopHatT, topHatBallT);
-	dynamicsWorld->addConstraint(topHatBall);
 
 	//// Mouth
 	//float mouthLength = headRadius;
@@ -423,78 +366,83 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	return zombie;
 }
 
-shared_ptr<PhysicsController> BGE::AnimatGame::CreateAnimat(glm::vec3 position, float totalSize)
-{
-	// Body
-	float bodyLength = totalSize;
-	float bodyWidth = bodyLength / 4;
-	float bodyHeight = bodyWidth / 2;
-	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
 
-	// Front Legs
-	float frontLegRadius = bodyHeight / 8;
-	float frontLegSegmentLength = bodyWidth;
-	
-	float frontLegSegmentAngle1 = 45.0f;
-	glm::vec3 frontLegSegmentOffset1 = glm::vec3(bodyWidth / 2, - bodyHeight / 2 - frontLegSegmentLength / 2, bodyLength / 2);
-	glm::quat frontLegSegmentQuat1 = glm::angleAxis(frontLegSegmentAngle1, glm::vec3(0, 0, 1));
-	shared_ptr<PhysicsController> frontLegSegmentTop = physicsFactory->CreateCylinder(frontLegRadius, frontLegSegmentLength, position + frontLegSegmentOffset1, frontLegSegmentQuat1);
+void BGE::AnimatGame::CreateHat(shared_ptr<PhysicsController> head, glm::vec3 headPosition, float headRadius, float radius, float height) {
+	glm::quat cylinderQuat = glm::angleAxis(90.0f, glm::vec3(1, 0, 0));
 
-	//// Body
-	//float bodyLength = totalSize;
-	//float bodyRadius = getPercentage(bodyLength, 10);
-	//float bodyAngle = 90;
-	//// Rotate body 90 degrees so it's sitting horizontally
-	//glm::quat bodyAngleQuat = glm::angleAxis(bodyAngle, glm::vec3(1, 0, 0));
-	//shared_ptr<PhysicsController> body = physicsFactory->CreateCylinder(bodyRadius, bodyLength, position, bodyAngleQuat);
+	// Base Hat
+	float baseRadius = radius;
+	float baseHeight = height / 3;
+	glm::vec3 baseOffset = glm::vec3(0, headRadius, 0);
+	shared_ptr<PhysicsController> hatBase = physicsFactory->CreateCylinder(baseRadius, baseHeight, headPosition + baseOffset, cylinderQuat);
 
-	//
-	//// Front Legs
-	//std::vector<shared_ptr<PhysicsController>> frontLegs;
+	colourObject(hatBase, glm::vec3(255.0f, 255.0f, 255.0f));
 
-	//int noPairsFrontLegs = 3;
-	//float frontLegLength = getPercentage(bodyLength, 33);
-	//float frontLegRadius = getPercentage(frontLegLength, 10);
-	//float frontLegAngle = bodyAngle - 90;
-	//float frontLegDistance = getPercentage(bodyLength, 15);
-	//glm::quat frontLegAngleQuat = glm::angleAxis(frontLegAngle, glm::vec3(1, 0, 0));
-	//for (int i = 0; i < noPairsFrontLegs; i++)
-	//{
-	//	glm::vec3 offset1 = glm::vec3(bodyRadius - frontLegRadius, - frontLegLength / 2 - bodyRadius, bodyLength / 2 - frontLegRadius - i * frontLegDistance);
-	//	shared_ptr<PhysicsController> leg1 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset1, frontLegAngleQuat);
-	//
-	//	glm::vec3 offset2 = offset1 - glm::vec3(2 * bodyRadius - 2 * frontLegRadius, 0, 0);
-	//	shared_ptr<PhysicsController> leg2 = physicsFactory->CreateCylinder(frontLegRadius, frontLegLength, position + offset2, frontLegAngleQuat);
+	btTransform baseHeadT, headBaseT;
+	baseHeadT.setIdentity();
+	baseHeadT.setOrigin(btVector3(baseOffset.x, baseOffset.y, baseOffset.z));
 
-	//	btTransform leg1T, leg2T, bodyLeg1T, bodyLeg2T;
-	//	leg1T.setIdentity();
-	//	leg1T.setRotation(toBtQuat(frontLegAngleQuat));
-	//	leg1T.setOrigin(btVector3(0, - frontLegLength / 2, 0));
+	headBaseT.setIdentity();
+	headBaseT.setOrigin(btVector3(0, -baseHeight / 2, 0));
 
-	//	bodyLeg1T.setIdentity();
-	//	bodyLeg1T.setRotation(toBtQuat(bodyAngleQuat));
-	//	bodyLeg1T.setOrigin(btVector3(bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
-
-	//	btFixedConstraint *frontLeg1_Body = new btFixedConstraint(*body->rigidBody, *leg1->rigidBody, bodyLeg1T, leg1T);
-	//	dynamicsWorld->addConstraint(frontLeg1_Body);
+	btFixedConstraint *baseHead = new btFixedConstraint(*hatBase->rigidBody, *head->rigidBody, headBaseT, baseHeadT);
+	dynamicsWorld->addConstraint(baseHead);
 
 
-	//	leg2T.setIdentity();
-	//	leg2T.setRotation(toBtQuat(frontLegAngleQuat));
-	//	leg2T.setOrigin(btVector3(0, -frontLegLength / 2, 0));
+	// Middle Hat
+	float middleRadius = radius * 3 / 4;
+	float middleHeight = height * 2 / 3;
+	glm::vec3 middleOffset = glm::vec3(0, baseHeight / 2, 0);
+	shared_ptr<PhysicsController> hatMiddle = physicsFactory->CreateCylinder(middleRadius, middleHeight, headPosition + baseOffset + middleOffset, cylinderQuat);
 
-	//	bodyLeg2T.setIdentity();
-	//	bodyLeg2T.setRotation(toBtQuat(bodyAngleQuat));
-	//	bodyLeg2T.setOrigin(btVector3(-bodyRadius, bodyLength / 2 - i * frontLegDistance, bodyRadius));
+	colourObject(hatMiddle, glm::vec3(100.0f, 0.0f, 0.0f));
 
-	//	btFixedConstraint *frontLeg2_Body = new btFixedConstraint(*body->rigidBody, *leg2->rigidBody, bodyLeg2T, leg2T);
-	//	dynamicsWorld->addConstraint(frontLeg2_Body);
+	btTransform middleBaseT, baseMiddleT;
+	middleBaseT.setIdentity();
+	middleBaseT.setOrigin(btVector3(middleOffset.x, middleOffset.y, middleOffset.z));
 
-	//	frontLegs.push_back(leg1);
-	//	frontLegs.push_back(leg2);
-	//}
+	baseMiddleT.setIdentity();
+	baseMiddleT.setOrigin(btVector3(0, -middleHeight / 2, 0));
 
-	return body;
+	btFixedConstraint *middleBase = new btFixedConstraint(*hatMiddle->rigidBody, *hatBase->rigidBody, baseMiddleT, middleBaseT);
+	dynamicsWorld->addConstraint(middleBase);
+
+
+	// Hat Top
+	float topRadius = radius / 5;
+	float topLength = height * 4 / 3;
+
+	glm::vec3 topOffset = glm::vec3(0, middleHeight / 2 + topRadius, 0);
+	shared_ptr<PhysicsController> hatTop = physicsFactory->CreateCylinder(topRadius, topLength, headPosition + baseOffset + middleOffset + topOffset, cylinderQuat);
+
+	colourObject(hatTop, glm::vec3(100.0f, 0.0f, 0.0f));
+
+	btTransform topMiddleT, headTopT;
+	topMiddleT.setIdentity();
+	topMiddleT.setOrigin(btVector3(topOffset.x, topOffset.y, topOffset.z));
+
+	headTopT.setIdentity();
+	headTopT.setOrigin(btVector3(0, topLength / 2, 0));
+
+	btGeneric6DofConstraint *topMiddle = new btGeneric6DofConstraint(*hatTop->rigidBody, *hatMiddle->rigidBody, headTopT, topMiddleT, true);
+	dynamicsWorld->addConstraint(topMiddle);
+
+	// Hat Ball
+	float ballRadius = topRadius * 2;
+	glm::vec3 ballOffset = glm::vec3(0, topLength / 2, 0);
+	shared_ptr<PhysicsController> hatBall = physicsFactory->CreateSphere(ballRadius, headPosition + baseOffset + middleOffset + topOffset + ballOffset, glm::quat());
+
+	colourObject(hatBall, glm::vec3(255.0f, 255.0f, 255.0f));
+
+	btTransform topHatBallT, ballTopHatT;
+	topHatBallT.setIdentity();
+	topHatBallT.setOrigin(btVector3(ballOffset.x, ballOffset.y, ballOffset.z));
+
+	ballTopHatT.setIdentity();
+	ballTopHatT.setOrigin(btVector3(0, -ballRadius, 0));
+
+	btFixedConstraint *topHatBall = new btFixedConstraint(*hatTop->rigidBody, *hatBall->rigidBody, ballTopHatT, topHatBallT);
+	dynamicsWorld->addConstraint(topHatBall);
 }
 
 float BGE::AnimatGame::getPercentage(float value, float percentage)
