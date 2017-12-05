@@ -242,6 +242,10 @@ zombieRigid BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	btFixedConstraint *headBody = new btFixedConstraint(*head->rigidBody, *body->rigidBody, headBodyT, bodyHeadT);
 	dynamicsWorld->addConstraint(headBody);
 
+	// Eyes
+	CreateEye(head, position + headOffset, glm::vec3(- headRadius / 2, headRadius / 2, headRadius), headRadius / 4);
+	CreateEye(head, position + headOffset, glm::vec3(+ headRadius / 2, headRadius / 2, headRadius), headRadius / 4);
+
 	// Hat
 	CreateHat(head, position + headOffset, headRadius, headRadius, headRadius);
 
@@ -390,7 +394,8 @@ void BGE::AnimatGame::CreateArm(shared_ptr<PhysicsController> body, glm::vec3 bo
 	}
 
 	btHingeConstraint *armBody = new btHingeConstraint(*arm->rigidBody, *body->rigidBody, btVector3(armSide * armRadius, 0, armLength / 2), btVector3(armOffset.x, armOffset.y, armOffset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
-	armBody->enableAngularMotor(true, 12, 17);
+	//armBody->enableAngularMotor(true, 12, 17);
+	armBody->enableAngularMotor(true, 12, 17.25f);
 	dynamicsWorld->addConstraint(armBody);
 
 	float handWidth = armRadius * 3;
@@ -420,6 +425,21 @@ void BGE::AnimatGame::CreateHand(shared_ptr<PhysicsController> arm, glm::vec3 ar
 		btPoint2PointConstraint *fingerHand = new btPoint2PointConstraint(*finger->rigidBody, *hand->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(armFingerOffset.x, armFingerOffset.y, armFingerOffset.z));
 		dynamicsWorld->addConstraint(fingerHand);
 	}
+}
+
+void  BGE::AnimatGame::CreateEye(shared_ptr<PhysicsController> head, glm::vec3 headPosition, glm::vec3 eyeOffset, float eyeRadius) {
+	shared_ptr<PhysicsController> eye = physicsFactory->CreateSphere(eyeRadius, headPosition + eyeOffset, glm::quat());
+	colourObject(eye, glm::vec3(255.0f, 255.0f, 255.0f));
+
+	btTransform headEyeT, eyeHeadT;
+	headEyeT.setIdentity();
+	headEyeT.setOrigin(btVector3(eyeOffset.x, eyeOffset.y, eyeOffset.z));
+
+	eyeHeadT.setIdentity();
+	eyeHeadT.setOrigin(btVector3(0, 0, 0));
+
+	btFixedConstraint *eyeHead = new btFixedConstraint(*eye->rigidBody, *head->rigidBody, eyeHeadT, headEyeT);
+	dynamicsWorld->addConstraint(eyeHead);
 }
 
 float BGE::AnimatGame::getPercentage(float value, float percentage)
