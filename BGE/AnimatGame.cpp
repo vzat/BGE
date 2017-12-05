@@ -24,7 +24,7 @@ bool AnimatGame::Initialise()
 	int minBlocks = 2;
 	for (int i = 0; i < noWalls; i++)
 	{
-		int blockSize = rand() % 3 + 1;
+		int blockSize = rand() % 2 + 1;
 		int blocksWidth = rand() % (maxBlocks - 1) + minBlocks;
 		int blocksHeight = rand() % (maxBlocks - 1) + minBlocks;
 		CreateWall(glm::vec3(rand() % 100, 0, rand() % 100), blockSize, blocksWidth, blocksHeight);
@@ -78,7 +78,6 @@ zombie BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	float bodyWidth = bodyLength / 2;
 	float bodyHeight = bodyWidth / 3;
 	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
-	//colourObject(body, glm::vec3(0.0f, 20.0f, 70.0f));
 	colourObject(body, glm::vec3(rand() % 100, rand() % 100, rand() % 100));
 
 	// Head
