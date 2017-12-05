@@ -31,8 +31,6 @@ bool AnimatGame::Initialise()
 	}
 
 	animat = CreateZombie(glm::vec3(0, 0, 0), 5);
-	CreateZombie(glm::vec3(-10, 0, 10), 5);
-	CreateZombie(glm::vec3(10, 0, 10), 5);
 
 	if (!Game::Initialise()) {
 		return false;
@@ -45,6 +43,21 @@ bool AnimatGame::Initialise()
 
 void BGE::AnimatGame::Update(float timeDelta)
 {
+	// Move left and right
+	if (keyState[SDL_SCANCODE_LEFT]) {
+		animat.arm2.armJoint->enableAngularMotor(true, 20, 25);
+	}
+	else {
+		animat.arm2.armJoint->enableAngularMotor(true, 12, 19);
+	}
+
+	if (keyState[SDL_SCANCODE_RIGHT]) {
+		animat.arm1.armJoint->enableAngularMotor(true, 20, 25);
+	}
+	else {
+		animat.arm1.armJoint->enableAngularMotor(true, 12, 17);
+	}
+
 	Game::Update(timeDelta);
 }
 
@@ -73,18 +86,22 @@ std::vector<std::vector<shared_ptr<PhysicsController>>> BGE::AnimatGame::CreateW
 
 zombie BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 {
+	zombie zombie;
+
 	// Body
 	float bodyLength = totalSize;
 	float bodyWidth = bodyLength / 2;
 	float bodyHeight = bodyWidth / 3;
 	shared_ptr<PhysicsController> body = physicsFactory->CreateBox(bodyWidth, bodyHeight, bodyLength, position, glm::quat());
 	colourObject(body, glm::vec3(rand() % 100, rand() % 100, rand() % 100));
+	zombie.body = body;
 
 	// Head
 	float headRadius = bodyWidth / 5;
 	glm::vec3 headOffset = glm::vec3(0, bodyHeight / 2 + headRadius, bodyLength / 2);
 	shared_ptr<PhysicsController> head = physicsFactory->CreateSphere(headRadius, position + headOffset, glm::quat());
 	colourObject(head, glm::vec3(55.0f, 15.0f, 90.0f));
+	zombie.head = head;
 
 	btTransform bodyHeadT, headBodyT;
 	bodyHeadT.setIdentity();
@@ -103,19 +120,14 @@ zombie BGE::AnimatGame::CreateZombie(glm::vec3 position, float totalSize)
 	// Hat
 	CreateHat(head, position + headOffset, headRadius, headRadius, headRadius);
 
-	//// Arms
+	// Arms
 	float armRadius = bodyWidth / 15;
 	float armLength = bodyLength / 2;
-	CreateArm(body, position, glm::vec3(+bodyWidth / 2 + armRadius, 0, bodyLength / 2 - armLength / 8), armLength, armRadius, false);
-	CreateArm(body, position, glm::vec3(-bodyWidth / 2 - armRadius, 0, bodyLength / 2 - armLength / 8), armLength, armRadius, true);
-
-	zombie zombie;
-	zombie.body = body;
-	zombie.head = head;
+	zombie.arm1 = CreateArm(body, position, glm::vec3(+bodyWidth / 2 + armRadius, 0, bodyLength / 2 - armLength / 8), armLength, armRadius, false);
+	zombie.arm2 = CreateArm(body, position, glm::vec3(-bodyWidth / 2 - armRadius, 0, bodyLength / 2 - armLength / 8), armLength, armRadius, true);
 
 	return zombie;
 }
-
 
 void BGE::AnimatGame::CreateHat(shared_ptr<PhysicsController> head, glm::vec3 headPosition, float headRadius, float radius, float height) {
 	glm::quat cylinderQuat = glm::angleAxis(90.0f, glm::vec3(1, 0, 0));
@@ -195,9 +207,12 @@ void BGE::AnimatGame::CreateHat(shared_ptr<PhysicsController> head, glm::vec3 he
 	dynamicsWorld->addConstraint(topHatBall);
 }
 
-void BGE::AnimatGame::CreateArm(shared_ptr<PhysicsController> body, glm::vec3 bodyPosition, glm::vec3 armOffset, float armLength, float armRadius, bool right = true) {
+zombieArm BGE::AnimatGame::CreateArm(shared_ptr<PhysicsController> body, glm::vec3 bodyPosition, glm::vec3 armOffset, float armLength, float armRadius, bool right = true) {
+	zombieArm zombieArm;
+
 	shared_ptr<PhysicsController> arm = physicsFactory->CreateBox(armRadius * 2, armRadius * 2, armLength, bodyPosition + armOffset, glm::quat());
 	colourObject(arm, glm::vec3(55.0f, 15.0f, 90.0f));
+	zombieArm.arm = arm;
 
 	float armSide = 1;
 	if (!right) {
@@ -212,18 +227,24 @@ void BGE::AnimatGame::CreateArm(shared_ptr<PhysicsController> body, glm::vec3 bo
 		armBody->enableAngularMotor(true, 12, 19);
 	}
 	
+	zombieArm.armJoint = armBody;
 	dynamicsWorld->addConstraint(armBody);
 
 	float handWidth = armRadius * 3;
 	float handHeight = armRadius;
 	glm::vec3 handOffset = glm::vec3(0, 0, -armLength / 2 - handWidth / 2);
 
-	CreateHand(arm, bodyPosition + armOffset, handOffset, handWidth, handHeight);
+	zombieArm.hand = CreateHand(arm, bodyPosition + armOffset, handOffset, handWidth, handHeight);
+
+	return zombieArm;
 }
 
-void BGE::AnimatGame::CreateHand(shared_ptr<PhysicsController> arm, glm::vec3 armPosition, glm::vec3 handOffset, float handWidth, float handHeight) {
+zombieHand BGE::AnimatGame::CreateHand(shared_ptr<PhysicsController> arm, glm::vec3 armPosition, glm::vec3 handOffset, float handWidth, float handHeight) {
+	zombieHand zombieHand;
+
 	shared_ptr<PhysicsController> hand = physicsFactory->CreateBox(handWidth, handHeight, handWidth, armPosition + handOffset, glm::quat());
 	colourObject(hand, glm::vec3(55.0f, 15.0f, 90.0f));
+	zombieHand.hand = hand;
 
 	btHingeConstraint *handArm = new btHingeConstraint(*hand->rigidBody, *arm->rigidBody, btVector3(0, 0, handWidth / 2), btVector3(handOffset.x, handOffset.y, handOffset.z), btVector3(1, 0, 0), btVector3(1, 0, 0));
 	handArm->setLimit(-3.14 / 2, 3.14 / 2);
@@ -234,13 +255,19 @@ void BGE::AnimatGame::CreateHand(shared_ptr<PhysicsController> arm, glm::vec3 ar
 	float noFingers = 3;
 	float fingerDistance = handWidth / noFingers;
 
+	std::vector<shared_ptr<PhysicsController>> fingers;
 	for (int i = -noFingers / 2; i < noFingers / 2; i++) {
 		glm::vec3 armFingerOffset = glm::vec3(i * fingerDistance, 0, -handWidth / 2);
 		shared_ptr<PhysicsController> finger = physicsFactory->CreateBox(fingerRadius * 2, fingerRadius * 2, fingerLength, armPosition + handOffset + armFingerOffset, glm::quat());
+		fingers.push_back(finger);
 
 		btPoint2PointConstraint *fingerHand = new btPoint2PointConstraint(*finger->rigidBody, *hand->rigidBody, btVector3(0, 0, fingerLength / 2), btVector3(armFingerOffset.x, armFingerOffset.y, armFingerOffset.z));
 		dynamicsWorld->addConstraint(fingerHand);
 	}
+
+	zombieHand.fingers = fingers;
+
+	return zombieHand;
 }
 
 void  BGE::AnimatGame::CreateEye(shared_ptr<PhysicsController> head, glm::vec3 headPosition, glm::vec3 eyeOffset, float eyeRadius) {
