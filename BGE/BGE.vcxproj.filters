@@ -218,6 +218,12 @@
     <ClCompile Include="AnimatGame.cpp">
       <Filter>Animats</Filter>
     </ClCompile>
+    <ClCompile Include="ZombieArm.cpp">
+      <Filter>Animats</Filter>
+    </ClCompile>
+    <ClCompile Include="ZombieHand.cpp">
+      <Filter>Animats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -386,6 +392,12 @@
       <Filter>Labs</Filter>
     </ClInclude>
     <ClInclude Include="AnimatGame.h">
+      <Filter>Animats</Filter>
+    </ClInclude>
+    <ClInclude Include="ZombieArm.h">
+      <Filter>Animats</Filter>
+    </ClInclude>
+    <ClInclude Include="ZombieHand.h">
       <Filter>Animats</Filter>
     </ClInclude>
   </ItemGroup>

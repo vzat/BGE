@@ -156,6 +156,8 @@
     <ClCompile Include="VectorDrawer.cpp" />
     <ClCompile Include="VRGame2.cpp" />
     <ClCompile Include="XBoxController.cpp" />
+    <ClCompile Include="ZombieArm.cpp" />
+    <ClCompile Include="ZombieHand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatGame.h" />
@@ -214,6 +216,8 @@
     <ClInclude Include="VectorDrawer.h" />
     <ClInclude Include="VRGame2.h" />
     <ClInclude Include="XBoxController.h" />
+    <ClInclude Include="ZombieArm.h" />
+    <ClInclude Include="ZombieHand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Classes.cd" />
